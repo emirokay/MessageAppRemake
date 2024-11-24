@@ -1,0 +1,9 @@
+# macOS system files
+.DS_Store
+
+# Xcode user data
+MessageAppRemake.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Firebase configuration
+GoogleService-Info.plist
+MessageAppRemake/.DS_Store

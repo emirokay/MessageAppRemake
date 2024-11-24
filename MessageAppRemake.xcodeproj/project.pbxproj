@@ -40,11 +40,6 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
-		5F63EDB82CF2B0EE00DBCABD /* Utils */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Utils;
-			sourceTree = "<group>";
-		};
 		5F63EDC72CF2B32F00DBCABD /* Root */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Root;
@@ -58,6 +53,21 @@
 		5F63EDD32CF2B4B000DBCABD /* Settings */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		5FFD30ED2CF3600D005C495A /* Components */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Components;
+			sourceTree = "<group>";
+		};
+		5FFD30F82CF3A36C005C495A /* ViewModifiers */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ViewModifiers;
+			sourceTree = "<group>";
+		};
+		5FFD31E02CF3C3BA005C495A /* Utils */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Utils;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -104,7 +114,9 @@
 				5F63EDA92CF2B06400DBCABD /* Assets.xcassets */,
 				5F63EDAB2CF2B06400DBCABD /* MessageAppRemakeApp.swift */,
 				5F63EDB72CF2B0D800DBCABD /* Extensions */,
-				5F63EDB82CF2B0EE00DBCABD /* Utils */,
+				5FFD30F82CF3A36C005C495A /* ViewModifiers */,
+				5FFD30ED2CF3600D005C495A /* Components */,
+				5FFD31E02CF3C3BA005C495A /* Utils */,
 				5F63EDB52CF2B09400DBCABD /* Services */,
 				5F63EDB32CF2B08500DBCABD /* Models */,
 				5F63EDC72CF2B32F00DBCABD /* Root */,
@@ -135,10 +147,12 @@
 				5F63EDB42CF2B08C00DBCABD /* Authentication */,
 				5F63EDB52CF2B09400DBCABD /* Services */,
 				5F63EDB72CF2B0D800DBCABD /* Extensions */,
-				5F63EDB82CF2B0EE00DBCABD /* Utils */,
 				5F63EDC72CF2B32F00DBCABD /* Root */,
 				5F63EDD22CF2B4A200DBCABD /* Inbox */,
 				5F63EDD32CF2B4B000DBCABD /* Settings */,
+				5FFD30ED2CF3600D005C495A /* Components */,
+				5FFD30F82CF3A36C005C495A /* ViewModifiers */,
+				5FFD31E02CF3C3BA005C495A /* Utils */,
 			);
 			name = MessageAppRemake;
 			packageProductDependencies = (
