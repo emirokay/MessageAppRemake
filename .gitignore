@@ -3,7 +3,9 @@
 
 # Xcode user data
 MessageAppRemake.xcodeproj/project.xcworkspace/xcuserdata/
+MessageAppRemake/.DS_Store
+*.xcsettings
+xcshareddata/
 
 # Firebase configuration
 GoogleService-Info.plist
-MessageAppRemake/.DS_Store
