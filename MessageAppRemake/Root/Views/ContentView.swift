@@ -8,17 +8,31 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
-    }
+	@StateObject var viewModel = ContentViewModel()
+	
+	var body: some View {
+		Group {
+			if viewModel.userSession != nil {
+				EmptyView()
+			} else {
+				LoginView(viewModel: viewModel)
+			}
+		}
+		.overlay {
+			LoadingView(show: viewModel.isLoading)
+		}
+		.alert(item: $viewModel.appError) { appError in
+			Alert(
+				title: Text(appError.title),
+				message: Text(appError.message),
+				dismissButton: .default(Text("OK")) {
+					viewModel.clearError()
+				}
+			)
+		}
+	}
 }
 
 #Preview {
-    ContentView()
+	ContentView()
 }

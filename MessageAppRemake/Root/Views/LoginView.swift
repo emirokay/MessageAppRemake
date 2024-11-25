@@ -1,5 +1,5 @@
 //
-//  RegisterView.swift
+//  LoginView.swift
 //  MessageAppRemake
 //
 //  Created by Emir Okay on 24.11.2024.
@@ -7,13 +7,10 @@
 
 import SwiftUI
 
-struct RegisterView: View {
-	@Environment(\.dismiss) var dismiss
-	
-	@State private var fullName: String = ""
+struct LoginView: View {
+	@ObservedObject var viewModel: ContentViewModel
 	@State private var email: String = ""
 	@State private var password: String = ""
-	@State private var confirmPassword: String = ""
 	
 	var body: some View {
 		NavigationStack {
@@ -21,19 +18,17 @@ struct RegisterView: View {
 				Spacer()
 				
 				// Title Section
-				HeaderView(title: "Sign Up", subtitle: "Create your account to get started.")
+				HeaderView(title: "Login", subtitle: "Please sign in to continue.")
 				
 				Spacer()
 				
 				// Input Fields
-				InputFieldView(icon: "person", placeholder: "Full name", text: $fullName)
 				InputFieldView(icon: "envelope", placeholder: "Email", text: $email)
 				InputFieldView(icon: "lock", placeholder: "Password", text: $password, isSecure: true)
-				InputFieldView(icon: "lock", placeholder: "Confirm Password", text: $confirmPassword, isSecure: true)
 				
-				// Sign Up Button
-				Button("Sign Up") {
-					// Sign Up action
+				// Login Button
+				Button("Login") {
+					viewModel.login(email: email, password: password)
 				}
 				.primaryButtonStyle()
 				.padding(.top, 10)
@@ -41,21 +36,22 @@ struct RegisterView: View {
 				Spacer()
 				Spacer()
 				
-				// Login Section
+				// Sign Up Section
 				HStack {
-					Text("Already have an account?")
+					Text("Don't have an account?")
 						.foregroundColor(.gray)
-					Button("Log in") {
-						dismiss()
-					}
-					.bold()
+					NavigationLink("Sign up", destination: RegisterView(viewModel: viewModel))
+						.bold()
 				}
 				.padding(.bottom)
 			}
+			.padding()
 		}
 	}
+	
+	
 }
 
 #Preview {
-	RegisterView()
+	LoginView(viewModel: ContentViewModel())
 }
