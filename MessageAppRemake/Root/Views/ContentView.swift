@@ -14,9 +14,7 @@ struct ContentView: View {
 		Group {
 			if viewModel.userSession != nil {
 				InboxView()
-			} else if viewModel.userSession != nil {
-				ProgressView("Loading user data...")
-			}  else {
+			} else {
 				LoginView(viewModel: viewModel)
 			}
 		}
