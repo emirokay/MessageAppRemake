@@ -34,7 +34,7 @@ struct RegisterView: View {
 				
 				// Sign Up Button
 				Button("Sign Up") {
-					// Sign Up action
+					viewModel.createUser(withEmail: email, password: password, confirmPassword: confirmPassword, fullname: fullName)
 				}
 				.primaryButtonStyle()
 				.padding(.top, 10)

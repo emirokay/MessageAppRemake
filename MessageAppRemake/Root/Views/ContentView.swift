@@ -8,13 +8,15 @@
 import SwiftUI
 
 struct ContentView: View {
-	@StateObject var viewModel = ContentViewModel()
+	@StateObject private var viewModel = ContentViewModel()
 	
 	var body: some View {
 		Group {
 			if viewModel.userSession != nil {
-				EmptyView()
-			} else {
+				InboxView()
+			} else if viewModel.userSession != nil {
+				ProgressView("Loading user data...")
+			}  else {
 				LoginView(viewModel: viewModel)
 			}
 		}

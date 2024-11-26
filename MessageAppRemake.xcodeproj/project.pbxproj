@@ -34,7 +34,7 @@
 		5FB0B1052CF3E6A000111712 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 5FB0B1042CF3E6A000111712 /* FirebaseStorage */; };
 		5FB0B1072CF3E6A000111712 /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 5FB0B1062CF3E6A000111712 /* FirebaseStorageCombine-Community */; };
 		5FB0B1092CF3E6A000111712 /* FirebaseVertexAI in Frameworks */ = {isa = PBXBuildFile; productRef = 5FB0B1082CF3E6A000111712 /* FirebaseVertexAI */; };
-		5FE2A1A72CF5154200E2AC57 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5FE2A1A62CF5154200E2AC57 /* GoogleService-Info.plist */; };
+		5FB6A44A2CF63C60000AB790 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5FB6A4492CF63C60000AB790 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,7 +42,7 @@
 		5F63EDA72CF2B06400DBCABD /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		5F63EDA92CF2B06400DBCABD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5F63EDAB2CF2B06400DBCABD /* MessageAppRemakeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageAppRemakeApp.swift; sourceTree = "<group>"; };
-		5FE2A1A62CF5154200E2AC57 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		5FB6A4492CF63C60000AB790 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -162,8 +162,8 @@
 			children = (
 				5F63EDA82CF2B06400DBCABD /* Preview Content */,
 				5F63EDA92CF2B06400DBCABD /* Assets.xcassets */,
-				5FE2A1A62CF5154200E2AC57 /* GoogleService-Info.plist */,
 				5F63EDAB2CF2B06400DBCABD /* MessageAppRemakeApp.swift */,
+				5FB6A4492CF63C60000AB790 /* GoogleService-Info.plist */,
 				5F63EDB72CF2B0D800DBCABD /* Extensions */,
 				5FE2A1762CF4FCFC00E2AC57 /* Managers */,
 				5FFD30F82CF3A36C005C495A /* ViewModifiers */,
@@ -280,7 +280,7 @@
 			files = (
 				5F63EDAF2CF2B06400DBCABD /* Preview Assets.xcassets in Resources */,
 				5F63EDB02CF2B06400DBCABD /* Assets.xcassets in Resources */,
-				5FE2A1A72CF5154200E2AC57 /* GoogleService-Info.plist in Resources */,
+				5FB6A44A2CF63C60000AB790 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
