@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct AppError: Identifiable {
+struct AppError: Identifiable, LocalizedError {
 	let id = UUID()
 	let title: String
 	let message: String
