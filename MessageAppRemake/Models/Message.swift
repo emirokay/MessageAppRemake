@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Message: Identifiable, Codable {
+struct Message: Identifiable, Codable, Equatable {
 	let id: String // Firestore document ID
 	let chatId: String // ID of the chat this message belongs to
 	let senderId: String // ID of the user who sent the message

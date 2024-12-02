@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 @MainActor
-class InboxViewModel: ObservableObject {
+class MainViewModel: ObservableObject {
 	@Published var currentUser: User?
 	
 	private let userService: UserServiceProtocol
