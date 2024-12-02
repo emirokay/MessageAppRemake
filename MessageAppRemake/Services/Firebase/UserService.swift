@@ -16,7 +16,7 @@ protocol UserServiceProtocol {
 	func fetchCurrentUser() async throws
 	func uploadUserData(user: User, userId: String) async throws
 	func deleteUserData(userId: String) async throws
-	func uploadProfileImage(userId: String, imageData: Data) async throws -> String?
+	func uploadProfileImage(userId: String, imageData: Data) async throws -> String
 }
 
 final class UserService: UserServiceProtocol {
@@ -74,7 +74,7 @@ final class UserService: UserServiceProtocol {
 		}
 	}
 	
-	func uploadProfileImage(userId: String, imageData: Data) async throws -> String? {
+	func uploadProfileImage(userId: String, imageData: Data) async throws -> String {
 		let storageRef = storage.reference().child("ProfileImages").child(userId)
 		let metadata = StorageMetadata()
 		metadata.contentType = "image/jpeg"

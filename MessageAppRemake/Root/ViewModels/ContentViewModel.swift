@@ -18,7 +18,7 @@ class ContentViewModel: ObservableObject {
 			fetchCurrentUserData()
 		}
 	}
-	@Published var isLoading = false
+	@Published var isLoading = true
 	@Published var appError: AppError? = nil
 	
 	private var cancellables = Set<AnyCancellable>()

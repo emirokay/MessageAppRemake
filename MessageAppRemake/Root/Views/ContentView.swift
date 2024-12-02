@@ -13,10 +13,8 @@ struct ContentView: View {
 	var body: some View {
 		Group {
 			if viewModel.userSession != nil {
-				InboxView()
-			} else if viewModel.userSession != nil {
-				ProgressView("Loading user data...")
-			}  else {
+				MainTabView()
+			} else {
 				LoginView(viewModel: viewModel)
 			}
 		}
