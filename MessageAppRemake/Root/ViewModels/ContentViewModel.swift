@@ -14,10 +14,9 @@ import Combine
 class ContentViewModel: ObservableObject {
 	
 	@Published var userSession: FirebaseAuth.User? {
-		didSet {
-			fetchCurrentUserData()
-		}
+		didSet { fetchCurrentUserData() }
 	}
+	
 	@Published var isLoading = true
 	@Published var appError: AppError? = nil
 	
@@ -49,6 +48,7 @@ class ContentViewModel: ObservableObject {
 				self?.appError = appError
 			}
 			.store(in: &cancellables)
+		
 	}
 	
 	private func setupAuthListener() {
@@ -58,60 +58,47 @@ class ContentViewModel: ObservableObject {
 	}
 	
 	private func fetchCurrentUserData() {
-		appState.setLoading(true)
-		Task {
-			do {
-				try await userService.fetchCurrentUser()
-			} catch {
-				appState.setError("Load User Failed", error.localizedDescription)
-			}
+		performTaskWithLoading {
+			try await self.userService.fetchCurrentUser()
 		}
-		appState.setLoading(false)
 	}
 	
 	func login(email: String, password: String) {
-		appState.setLoading(true)
-		Task {
-			do {
-				try await authService.login(withEmail: email, password: password)
-			} catch {
-				appState.setError("Login failed", error.localizedDescription)
-			}
+		performTaskWithLoading {
+			try await self.authService.login(withEmail: email, password: password)
 		}
-		appState.setLoading(false)
 	}
 	
 	func signOut() {
-		appState.setLoading(true)
-		Task {
-			do {
-				try await authService.signOut()
-			} catch {
-				appState.setError("Sign Out Failed", error.localizedDescription)
-			}
+		performTaskWithLoading {
+			try await self.authService.signOut()
 		}
-		appState.setLoading(false)
 	}
 	
 	func createUser(withEmail email: String, password: String, confirmPassword: String, fullname: String) {
 		if password == confirmPassword {
-			appState.setLoading(true)
-			Task {
-				do {
-					try await authService.createUser(withEmail: email, password: password, fullname: fullname)
-				} catch {
-					appState.setError("Sign Up Failed", error.localizedDescription)
-				}
+			performTaskWithLoading {
+				try await self.authService.createUser(withEmail: email, password: password, fullname: fullname)
 			}
 		} else {
 			appState.setError("Sign Up Failed", "Passwords do not match")
 		}
-		appState.setLoading(false)
 	}
 	
 	func clearError() {
 		appState.clearError()
 	}
 	
+	private func performTaskWithLoading(_ task: @escaping () async throws -> Void) {
+		appState.setLoading(true)
+		Task {
+			defer { appState.setLoading(false) }
+			do {
+				try await task()
+			} catch {
+				appState.setError("Operation Failed", error.localizedDescription)
+			}
+		}
+	}
+	
 }
-

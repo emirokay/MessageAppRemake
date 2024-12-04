@@ -27,7 +27,7 @@ final class AuthService: AuthServiceProtocol {
 	var userSessionPublisher: Published<FirebaseAuth.User?>.Publisher { $userSession }
 	
 	private let userService: UserServiceProtocol
-		   
+	
 	private init(userService: UserServiceProtocol = UserService.shared) {
 		self.userService = userService
 		self.userSession = Auth.auth().currentUser
@@ -65,7 +65,7 @@ final class AuthService: AuthServiceProtocol {
 				name: fullname,
 				email: email,
 				profileImageURL: nil,
-				about: nil
+				about: ""
 			)
 			try await userService.uploadUserData(user: user, userId: result.user.uid)
 			try await userService.fetchCurrentUser()
@@ -77,28 +77,24 @@ final class AuthService: AuthServiceProtocol {
 	
 	@MainActor
 	func deleteAccount() async throws {
+		guard let uid = Auth.auth().currentUser?.uid else {
+			return
+		}
+		
 		do {
-			guard let uid = Auth.auth().currentUser?.uid else { return }
+			// Delete user data
+			try await userService.deleteUserData(userId: uid)
+			try await Firestore.firestore().collection("users").document(uid).delete()
 			
-//			try await userService.deleteUserData(userId: uid) // Delegate to UserService
-//			try await Auth.auth().currentUser?.delete()       // Delete user authentication
-			
-			// Delete profile image (if exists)
+			// Delete profile image
 			let storageReference = Storage.storage().reference().child("ProfileImages").child(uid)
-			let profileImageExists = try await storageReference.listAll().items.count > 0
-			if profileImageExists {
-				try await storageReference.delete()
-			}
+			try await storageReference.delete()
 			
-			// Delete user document
-			let userDocumentReference = Firestore.firestore().collection("users").document(uid)
-			try await userDocumentReference.delete()
-			
-			// Delete authentication account
+			// Delete user authentication
+			try await userService.deleteUserData(userId: uid)
 			try await Auth.auth().currentUser?.delete()
 			
 			self.userSession = nil
-			//UserService.shared.currentUser = nil
 		} catch {
 			throw error
 		}

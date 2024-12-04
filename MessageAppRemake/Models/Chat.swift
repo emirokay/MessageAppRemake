@@ -7,12 +7,12 @@
 
 import Foundation
 
-struct Chat: Identifiable, Codable {
-	let id: String // Firestore document ID
-	let type: ChatType // "individual" or "group"
-	let name: String? // Group name
-	let imageUrl: String? // Group profile picture
-	let members: [String] // Array of User IDs
+struct Chat: Identifiable, Codable, Equatable {
+	let id: String
+	let type: ChatType
+	let name: String
+	let imageUrl: String?
+	let members: [String]
 	let lastMessage: String
 	let lastMessageBy: String
 	let lastMessageAt: Date
@@ -21,14 +21,13 @@ struct Chat: Identifiable, Codable {
 	let isRead: Bool
 	let unreadCount: Int
 	let messages: [Message]
-
+	
 	enum ChatType: String, Codable {
 		case individual
 		case group
 	}
 	
-	// Initializer
-	init(id: String, type: ChatType, name: String? = nil, imageUrl: String? = nil, members: [String], lastMessage: String, lastMessageBy: String, lastMessageAt: Date, isPinned: Bool, isMuted: Bool, isRead: Bool, unreadCount: Int, messages: [Message]) {
+	init(id: String, type: ChatType, name: String, imageUrl: String? = nil, members: [String], lastMessage: String, lastMessageBy: String, lastMessageAt: Date, isPinned: Bool, isMuted: Bool, isRead: Bool, unreadCount: Int, messages: [Message]) {
 		self.id = id
 		self.type = type
 		self.name = name

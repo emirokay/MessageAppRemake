@@ -17,16 +17,13 @@ struct LoginView: View {
 			VStack(alignment: .center) {
 				Spacer()
 				
-				// Title Section
 				HeaderView(title: "Login", subtitle: "Please sign in to continue.")
 				
 				Spacer()
 				
-				// Input Fields
 				InputFieldView(icon: "envelope", placeholder: "Email", text: $email)
 				InputFieldView(icon: "lock", placeholder: "Password", text: $password, isSecure: true)
 				
-				// Login Button
 				Button("Login") {
 					viewModel.login(email: email, password: password)
 				}
@@ -36,7 +33,6 @@ struct LoginView: View {
 				Spacer()
 				Spacer()
 				
-				// Sign Up Section
 				HStack {
 					Text("Don't have an account?")
 						.foregroundColor(.gray)
@@ -48,8 +44,6 @@ struct LoginView: View {
 			.padding()
 		}
 	}
-	
-	
 }
 
 #Preview {

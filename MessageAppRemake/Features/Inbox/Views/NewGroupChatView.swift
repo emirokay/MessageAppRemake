@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct NewGroupChatView: View {
-    var body: some View {
+	var body: some View {
 		NavigationStack{
 			Text("New Group Chat")
 		}
-    }
+	}
 }
 
 #Preview {
-    NewGroupChatView()
+	NewGroupChatView()
 }

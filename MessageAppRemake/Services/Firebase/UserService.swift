@@ -32,24 +32,27 @@ final class UserService: UserServiceProtocol {
 	}
 	
 	@MainActor
+	func fetchUser(userId: String) async throws -> User {
+		let document = try await firestore.collection("users").document(userId).getDocument()
+		guard let data = document.data() else {
+			throw AppError(title: "Error", message: "User not found")
+		}
+		return try Firestore.Decoder().decode(User.self, from: data)
+	}
+	
+	@MainActor
 	func fetchCurrentUser() async throws {
 		guard let uid = Auth.auth().currentUser?.uid else {
-			throw AppError(title: "User Not Logged In", message: "Please log in to access your account.")
+			return
 		}
-		
-		let document = try await firestore.collection("users").document(uid).getDocument()
-		guard let data = document.data() else {
-			throw AppError(title: "User Not Found", message: "We couldn't find your account details.")
-		}
-		
-		let user = try Firestore.Decoder().decode(User.self, from: data)
-		self.currentUser = user
+		self.currentUser = try await fetchUser(userId: uid)
 	}
 	
 	func uploadUserData(user: User, userId: String) async throws {
 		do {
 			let encodedUser = try Firestore.Encoder().encode(user)
 			try await firestore.collection("users").document(userId).setData(encodedUser)
+			try await fetchCurrentUser()
 		} catch {
 			throw error
 		}
@@ -72,6 +75,7 @@ final class UserService: UserServiceProtocol {
 				throw error
 			}
 		}
+		self.currentUser = nil
 	}
 	
 	func uploadProfileImage(userId: String, imageData: Data) async throws -> String {

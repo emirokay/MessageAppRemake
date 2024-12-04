@@ -12,40 +12,77 @@ struct InboxView: View {
 	@State private var searchText = ""
 	@State private var showNewChatView = false
 	
+	@State private var showSelectedChat = false
+	@State private var selectedChat: Chat?
+	
 	var body: some View {
-		
 		NavigationStack {
-			List {
-				// Search Bar
-				SearchBarView(searchText: $searchText)
-				
-				// Filtered Chats
-				ForEach(viewModel.filteredChats(searchText: searchText)) { chat in
-					// Navigate to selected chat
-					NavigationLink(destination: MessagesView(chat: chat)) {
-						// Chat row view
-						InboxChatRowView(chat: chat)
+			VStack {
+				chatList
+					.searchable(text: $searchText)
+					.listStyle(PlainListStyle())
+					.navigationTitle("Chats")
+					.toolbar {
+						ToolbarItem(placement: .topBarTrailing) {
+							newChatButton
+						}
 					}
-				}
-			}
-			.listStyle(PlainListStyle())
-			.navigationTitle("Chats")
-			.toolbar {
-				ToolbarItem(placement: .topBarTrailing) {
-					Button {
-						showNewChatView.toggle()
-					} label: {
-						Image(systemName: "plus.circle.fill")
-							.font(.title2)
-							.foregroundStyle(.blue)
+					.sheet(isPresented: $showNewChatView) {
+						NewChatView(selectedChat: $selectedChat, showSelectedChat: $showSelectedChat)
 					}
-				}
-			}
-			.sheet(isPresented: $showNewChatView) {
-				// Start new chat view
-				NewChatView()
+					.onAppear {
+						viewModel.fetchChats()
+					}
+					.navigationDestination(isPresented: $showSelectedChat, destination: {
+						if let chat = selectedChat {
+							MessagesView(chat: chat)
+						}
+					})
 			}
 		}
+	}
+	
+	private var chatList: some View {
+		List {
+			ForEach(viewModel.filteredChats(searchText: searchText)) { chat in
+				let destination = MessagesView(chat: chat)
+				NavigationLink(destination: destination) {
+					InboxChatRowView(viewModel: viewModel, chat: chat)
+						.swipeActions {
+							pinButton(for: chat)
+							muteButton(for: chat)
+						}
+				}
+			}
+		}
+	}
+	
+	private var newChatButton: some View {
+		Button {
+			showNewChatView.toggle()
+		} label: {
+			Image(systemName: "plus.circle.fill")
+				.font(.title2)
+				.foregroundStyle(.blue)
+		}
+	}
+	
+	private func pinButton(for chat: Chat) -> some View {
+		Button {
+			
+		} label: {
+			Label("Pin chat", systemImage: chat.isPinned ? "pin.slash.fill" : "pin.fill")
+		}
+		.tint(.gray)
+	}
+	
+	private func muteButton(for chat: Chat) -> some View {
+		Button {
+			
+		} label: {
+			Label("Mute", systemImage: chat.isMuted ? "bell.fill" : "bell.slash.fill")
+		}
+		.tint(.orange)
 	}
 }
 
