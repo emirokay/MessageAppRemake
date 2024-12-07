@@ -10,10 +10,10 @@ import FirebaseFirestore
 import Combine
 
 class InboxViewModel: ObservableObject {
-	@Published var chats: [Chat] = [MockData.mocChat]
-	
+	@Published var chats: [Chat] = []
 	@Published var currentUserId: String?
 	
+	private let userService: UserServiceProtocol
 	private let chatRepository: ChatRepositoryProtocol
 	private var cancellables = Set<AnyCancellable>()
 	
@@ -24,6 +24,7 @@ class InboxViewModel: ObservableObject {
 		 appState: AppStateProtocol = AppState.shared) {
 		self.chatRepository = chatRepository
 		self.appState = appState
+		self.userService = userService
 		setupSubscribers(userService: userService)
 		fetchChats()
 	}

@@ -7,14 +7,15 @@
 
 import SwiftUI
 
-struct PrimaryButtonStyle: ViewModifier {
+struct PrimaryButtonStyle: View {
+	let text: String
+	let sysyemImage: String
 	let backgroundColor: Color
 	let width: CGFloat
-	let sysyemImage: String
 	
-	func body(content: Content) -> some View {
+	var body: some View {
 		HStack {
-			content
+			Text(text)
 			Image(systemName: sysyemImage)
 		}
 		.padding()

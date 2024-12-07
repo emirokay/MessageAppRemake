@@ -13,7 +13,7 @@ class NewChatViewModel: ObservableObject {
 	@Published var users: [User] = []
 	private let chatRepository: ChatRepositoryProtocol
 	private let appState: AppStateProtocol
-	private var currentUserId: String?
+	@Published private var currentUser: User?
 	private var cancellables = Set<AnyCancellable>()
 	@Published var newChat: Chat?
 	
@@ -28,12 +28,8 @@ class NewChatViewModel: ObservableObject {
 	
 	private func setupSubscribers(userService: UserServiceProtocol) {
 		userService.currentUserPublisher
-			.compactMap { $0?.id }
 			.receive(on: DispatchQueue.main)
-			.sink { [weak self] userId in
-				self?.currentUserId = userId
-			}
-			.store(in: &cancellables)
+			.assign(to: &$currentUser)
 	}
 	
 	func fetchUsers() {
@@ -42,7 +38,7 @@ class NewChatViewModel: ObservableObject {
 			do {
 				let allUsers = try await chatRepository.fetchUsers()
 				DispatchQueue.main.async {
-					self.users = allUsers.filter { $0.id != self.currentUserId }
+					self.users = allUsers.filter { $0.id != self.currentUser?.id }
 				}
 			} catch {
 				self.appState.setError("Error Fetching Users", error.localizedDescription)
@@ -56,14 +52,14 @@ class NewChatViewModel: ObservableObject {
 	}
 	
 	func startChat(with user: User) {
-		guard let currentUserId else { return }
+		guard let currentUser else { return }
 		
 		appState.setLoading(true)
-		let chatId = generateChatId(user1: currentUserId, user2: user.id)
+		let chatId = generateChatId(user1: currentUser.id, user2: user.id)
 		Task {
 			do {
 				if let existingChat = try await chatRepository.fetchChat(chatId: chatId) {
-					DispatchQueue.main.async {
+					await MainActor.run {
 						self.newChat = existingChat
 					}
 				} else {
@@ -71,7 +67,8 @@ class NewChatViewModel: ObservableObject {
 						id: chatId,
 						type: .individual,
 						name: user.name,
-						members: [currentUserId, user.id],
+						members: [currentUser.id: currentUser.name, user.id: user.name],
+						memberIds: [currentUser.id, user.id],
 						lastMessage: "",
 						lastMessageBy: "",
 						lastMessageAt: Date(),
@@ -82,9 +79,13 @@ class NewChatViewModel: ObservableObject {
 						messages: []
 					)
 					try await chatRepository.createChat(chat: newChat)
-					self.newChat = newChat
+					await MainActor.run {
+						self.newChat = newChat
+				   }
 				}
 			} catch {
+				print(error)
+				print(error.localizedDescription)
 				appState.setError("Error Starting Chat", error.localizedDescription)
 			}
 			appState.setLoading(false)

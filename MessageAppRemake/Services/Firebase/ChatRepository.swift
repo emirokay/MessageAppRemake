@@ -25,7 +25,7 @@ final class ChatRepository: ChatRepositoryProtocol {
 	func fetchChats(for userId: String) -> AnyPublisher<[Chat], Error> {
 		let subject = PassthroughSubject<[Chat], Error>()
 		db.collection("chats")
-			.whereField("members", arrayContains: userId)
+			.whereField("memberIds", arrayContains: userId)
 			.addSnapshotListener { snapshot, error in
 				if let error = error {
 					subject.send(completion: .failure(error))
@@ -39,7 +39,10 @@ final class ChatRepository: ChatRepositoryProtocol {
 	
 	func fetchChat(chatId: String) async throws -> Chat? {
 		let document = try await db.collection("chats").document(chatId).getDocument()
-		return try document.data(as: Chat.self)
+		if document.exists {
+			return try document.data(as: Chat.self)
+		}
+		return nil
 	}
 	
 	func createChat(chat: Chat) async throws {

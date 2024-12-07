@@ -40,6 +40,7 @@ struct ProfileEditView: View {
 					}label: {
 						HStack {
 							Text(viewModel.getCurrentUser().about.isEmpty ? "Add something about yourself" : viewModel.getCurrentUser().about)
+								.foregroundStyle(viewModel.getCurrentUser().about.isEmpty ? .gray : .primary)
 							
 							Spacer()
 							Image(systemName: "chevron.right")

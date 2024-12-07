@@ -24,10 +24,11 @@ struct LoginView: View {
 				InputFieldView(icon: "envelope", placeholder: "Email", text: $email)
 				InputFieldView(icon: "lock", placeholder: "Password", text: $password, isSecure: true)
 				
-				Button("Login") {
+				Button {
 					viewModel.login(email: email, password: password)
+				} label: {
+					PrimaryButtonStyle(text: "Login", sysyemImage: "arrow.right", backgroundColor: .blue, width: 120)
 				}
-				.primaryButtonStyle()
 				.padding(.top, 10)
 				
 				Spacer()

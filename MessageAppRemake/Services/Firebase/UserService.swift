@@ -13,6 +13,7 @@ import FirebaseAuth
 
 protocol UserServiceProtocol {
 	var currentUserPublisher: Published<User?>.Publisher { get }
+	func fetchUser(userId: String)  async throws -> User
 	func fetchCurrentUser() async throws
 	func uploadUserData(user: User, userId: String) async throws
 	func deleteUserData(userId: String) async throws
@@ -66,15 +67,18 @@ final class UserService: UserServiceProtocol {
 		}
 		
 		let profileImageRef = storage.reference().child("ProfileImages").child(userId)
-		do {
-			try await profileImageRef.delete()
-		} catch let error as NSError {
-			if error.domain == StorageErrorDomain && error.code == StorageErrorCode.objectNotFound.rawValue {
-				throw AppError(title: "Delete Failed", message: "No profile image found for deletion.")
-			} else {
-				throw error
+		if let _ = try? await profileImageRef.getMetadata() {
+			do {
+				try await profileImageRef.delete()
+			} catch let error as NSError {
+				if error.domain == StorageErrorDomain && error.code == StorageErrorCode.objectNotFound.rawValue {
+					throw AppError(title: "Delete Failed", message: "No profile image found for deletion.")
+				} else {
+					throw error
+				}
 			}
 		}
+		
 		self.currentUser = nil
 	}
 	

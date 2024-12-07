@@ -80,20 +80,9 @@ final class AuthService: AuthServiceProtocol {
 		guard let uid = Auth.auth().currentUser?.uid else {
 			return
 		}
-		
 		do {
-			// Delete user data
-			try await userService.deleteUserData(userId: uid)
-			try await Firestore.firestore().collection("users").document(uid).delete()
-			
-			// Delete profile image
-			let storageReference = Storage.storage().reference().child("ProfileImages").child(uid)
-			try await storageReference.delete()
-			
-			// Delete user authentication
 			try await userService.deleteUserData(userId: uid)
 			try await Auth.auth().currentUser?.delete()
-			
 			self.userSession = nil
 		} catch {
 			throw error

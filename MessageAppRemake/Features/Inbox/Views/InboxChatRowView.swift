@@ -18,9 +18,12 @@ struct InboxChatRowView: View {
 			
 			VStack(alignment: .leading, spacing: 4) {
 				HStack {
-					Text(chat.name)
-						.font(.headline)
-						.lineLimit(1)
+					if let id = viewModel.currentUserId {
+						Text(chat.chatName(for: id))
+							.font(.headline)
+							.lineLimit(1)
+					}
+						
 					Spacer()
 					Text(chat.lastMessageAt.formatted(.dateTime.hour().minute()))
 						.font(.subheadline)

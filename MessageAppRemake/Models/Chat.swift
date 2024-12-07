@@ -12,7 +12,8 @@ struct Chat: Identifiable, Codable, Equatable {
 	let type: ChatType
 	let name: String
 	let imageUrl: String?
-	let members: [String]
+	let members: [String: String]
+	let memberIds: [String]
 	let lastMessage: String
 	let lastMessageBy: String
 	let lastMessageAt: Date
@@ -22,17 +23,25 @@ struct Chat: Identifiable, Codable, Equatable {
 	let unreadCount: Int
 	let messages: [Message]
 	
+	func chatName(for currentUserId: String) -> String {
+		if type == .individual {
+			return members.first(where: { $0.key != currentUserId })?.value ?? "Unknown User"
+		}
+		return name
+	}
+	
 	enum ChatType: String, Codable {
 		case individual
 		case group
 	}
 	
-	init(id: String, type: ChatType, name: String, imageUrl: String? = nil, members: [String], lastMessage: String, lastMessageBy: String, lastMessageAt: Date, isPinned: Bool, isMuted: Bool, isRead: Bool, unreadCount: Int, messages: [Message]) {
+	init(id: String, type: ChatType, name: String, imageUrl: String? = nil, members: [String: String], memberIds: [String], lastMessage: String, lastMessageBy: String, lastMessageAt: Date, isPinned: Bool, isMuted: Bool, isRead: Bool, unreadCount: Int, messages: [Message]) {
 		self.id = id
 		self.type = type
 		self.name = name
 		self.imageUrl = imageUrl
 		self.members = members
+		self.memberIds = memberIds
 		self.lastMessage = lastMessage
 		self.lastMessageBy = lastMessageBy
 		self.lastMessageAt = lastMessageAt

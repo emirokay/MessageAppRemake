@@ -30,10 +30,11 @@ struct RegisterView: View {
 				InputFieldView(icon: "lock", placeholder: "Password", text: $password, isSecure: true)
 				InputFieldView(icon: "lock", placeholder: "Confirm Password", text: $confirmPassword, isSecure: true)
 				
-				Button("Sign Up") {
+				Button {
 					viewModel.createUser(withEmail: email, password: password, confirmPassword: confirmPassword, fullname: fullName)
+				} label: {
+					PrimaryButtonStyle(text: "Sign Up", sysyemImage: "arrow.right", backgroundColor: .blue, width: 120)
 				}
-				.primaryButtonStyle()
 				.padding(.top, 10)
 				
 				Spacer()
