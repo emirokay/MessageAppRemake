@@ -32,12 +32,12 @@ class ProfileViewModel: ObservableObject {
 			try await authService.signOut()
 		}
 	}
-	
+	//IDK WTF IS THIS
 	func getCurrentUser() -> User {
 		if let user = currentUser {
 			return user
 		}
-		return  User(id: "0", name: "Unknown", email: "Unknown", about: "Unknown")
+		return  User(id: "0", name: "Unknown", email: "Unknown", profileImageURL: "", about: "Unknown")
 	}
 	
 	func deleteAccount(authService: AuthServiceProtocol = AuthService.shared) {
@@ -46,13 +46,21 @@ class ProfileViewModel: ObservableObject {
 		}
 	}
 	
-	func saveUser(name: String, about: String) {
-		if var user = currentUser {
-			user.name = name
-			user.about = about
-			performTaskWithLoading {
-				try await self.userService.uploadUserData(user: user, userId: user.id)
+	func saveUser(name: String, about: String, imageData: Data) {
+		guard var user = currentUser else { return }
+		user.name = name
+		user.about = about
+		
+		performTaskWithLoading {
+			if !imageData.isEmpty {
+				do {
+					let profileUrl = try await self.userService.uploadProfileImage(userId: user.id, imageData: imageData)
+					user.profileImageURL = profileUrl 
+				} catch {
+					throw error
+				}
 			}
+			try await self.userService.uploadUserData(user: user, userId: user.id)
 		}
 	}
 	

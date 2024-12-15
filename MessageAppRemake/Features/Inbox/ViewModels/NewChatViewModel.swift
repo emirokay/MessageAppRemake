@@ -36,7 +36,7 @@ class NewChatViewModel: ObservableObject {
 		appState.setLoading(true)
 		Task {
 			do {
-				let allUsers = try await chatRepository.fetchUsers()
+				let allUsers = try await chatRepository.fetchAllUsers()
 				DispatchQueue.main.async {
 					self.users = allUsers.filter { $0.id != self.currentUser?.id }
 				}
@@ -67,7 +67,7 @@ class NewChatViewModel: ObservableObject {
 						id: chatId,
 						type: .individual,
 						name: user.name,
-						members: [currentUser.id: currentUser.name, user.id: user.name],
+						imageUrl: "",
 						memberIds: [currentUser.id, user.id],
 						lastMessage: "",
 						lastMessageBy: "",

@@ -17,15 +17,13 @@ struct ProfileView: View {
 				NavigationLink {
 					ProfileEditView(viewModel: viewModel)
 				} label: {
+					CircularProfileImage(url: viewModel.getCurrentUser().profileImageURL, size: 100)
 					VStack(alignment: .leading) {
-						Image(systemName: "person.circle.fill")
-						
 						Text(viewModel.getCurrentUser().name)
 							.font(.title3)
 							.bold()
 						Text(viewModel.getCurrentUser().about)
 							.foregroundColor(.gray)
-						
 					}
 					.padding(.vertical)
 				}

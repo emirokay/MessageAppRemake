@@ -11,10 +11,10 @@ struct User: Identifiable, Codable {
 	let id: String
 	var name: String
 	var email: String
-	var profileImageURL: String?
+	var profileImageURL: String
 	var about: String
 	
-	init(id: String, name: String, email: String, profileImageURL: String? = nil, about: String) {
+	init(id: String, name: String, email: String, profileImageURL: String, about: String) {
 		self.id = id
 		self.name = name
 		self.email = email

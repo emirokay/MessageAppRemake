@@ -11,13 +11,14 @@ import Combine
 
 class InboxViewModel: ObservableObject {
 	@Published var chats: [Chat] = []
-	@Published var currentUserId: String?
+	@Published var users: [User] = []
 	
+	@Published var currentUserId: String? //CHECK THIS MAYBE UNNECESSATY 
+	
+	private let appState: AppStateProtocol
 	private let userService: UserServiceProtocol
 	private let chatRepository: ChatRepositoryProtocol
 	private var cancellables = Set<AnyCancellable>()
-	
-	private let appState: AppStateProtocol
 	
 	init(chatRepository: ChatRepositoryProtocol = ChatRepository(),
 		 userService: UserServiceProtocol = UserService.shared,
@@ -26,7 +27,6 @@ class InboxViewModel: ObservableObject {
 		self.appState = appState
 		self.userService = userService
 		setupSubscribers(userService: userService)
-		fetchChats()
 	}
 	
 	private func setupSubscribers(userService: UserServiceProtocol) {
@@ -35,6 +35,7 @@ class InboxViewModel: ObservableObject {
 			.receive(on: DispatchQueue.main)
 			.sink { [weak self] userId in
 				self?.currentUserId = userId
+				self?.fetchChats()
 			}
 			.store(in: &cancellables)
 	}
@@ -43,20 +44,40 @@ class InboxViewModel: ObservableObject {
 		guard let currentUserId else { return }
 		chatRepository.fetchChats(for: currentUserId)
 			.receive(on: DispatchQueue.main)
-			.sink(receiveCompletion: { completion in
-				if case let .failure(error) = completion {
-					self.appState.setError("Error fetching chats", error.localizedDescription)
+			.sink { [weak self] completion in
+				if case .failure(let error) = completion {
+					self?.appState.setError("Error fetching chats", error.localizedDescription)
 				}
-			}, receiveValue: { [weak self] chats in
+			} receiveValue: { [weak self] chats in
 				self?.chats = chats
-			})
+				self?.fetchUsers(for: chats)
+			}
+			.store(in: &cancellables)
+	   }
+	
+	private func fetchUsers(for chats: [Chat]) {
+		let userIds = Set(chats.flatMap { $0.memberIds }.filter { $0 != currentUserId })
+
+		chatRepository.fetchUsersInChats(for: Array(userIds))
+			.receive(on: DispatchQueue.main)
+			.sink { [weak self] completion in
+				if case .failure(let error) = completion {
+					self?.appState.setError("Error fetching users", error.localizedDescription)
+				}
+			} receiveValue: { [weak self] users in
+				self?.users = users
+			}
 			.store(in: &cancellables)
 	}
 	
 	func filteredChats(searchText: String) -> [Chat] {
 		let normalizedSearchText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
 		guard !normalizedSearchText.isEmpty else { return chats }
-		return chats.filter { $0.name.localizedCaseInsensitiveContains(normalizedSearchText) }
+
+		return chats.filter { chat in
+			let chatName = chat.chatName(for: currentUserId ?? "", users: users)
+			return chatName.localizedCaseInsensitiveContains(normalizedSearchText)
+		}
 	}
 	
 	func pinChat(chatId: String) async throws {

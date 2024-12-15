@@ -14,16 +14,15 @@ struct InboxChatRowView: View {
 	var body: some View {
 		HStack {
 			// Profile Image
-			Image(systemName: "person.circle.fill")
+			CircularProfileImage(url: chat.displayImageURL(for: viewModel.currentUserId ?? "", users: viewModel.users))
 			
 			VStack(alignment: .leading, spacing: 4) {
 				HStack {
-					if let id = viewModel.currentUserId {
-						Text(chat.chatName(for: id))
-							.font(.headline)
-							.lineLimit(1)
-					}
-						
+					
+					Text(chat.chatName(for: viewModel.currentUserId ?? "", users: viewModel.users))
+						.font(.headline)
+						.lineLimit(1)
+					
 					Spacer()
 					Text(chat.lastMessageAt.formatted(.dateTime.hour().minute()))
 						.font(.subheadline)

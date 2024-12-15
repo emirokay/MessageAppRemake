@@ -64,7 +64,7 @@ final class AuthService: AuthServiceProtocol {
 				id: result.user.uid,
 				name: fullname,
 				email: email,
-				profileImageURL: nil,
+				profileImageURL: "",
 				about: ""
 			)
 			try await userService.uploadUserData(user: user, userId: result.user.uid)

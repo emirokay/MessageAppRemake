@@ -12,6 +12,15 @@ struct MainTabView: View {
 	@StateObject var profileViewModel = ProfileViewModel()
 	
 	var body: some View {
+		MainTabView2(inboxViewModel: inboxViewModel, profileViewModel: profileViewModel)
+	}
+}
+
+struct MainTabView2: View {
+	@ObservedObject var inboxViewModel: InboxViewModel
+	@ObservedObject var profileViewModel: ProfileViewModel
+	
+	var body: some View {
 		TabView {
 			InboxView(viewModel: inboxViewModel)
 				.tabItem {

@@ -12,7 +12,8 @@ import Combine
 protocol ChatRepositoryProtocol {
 	func fetchChats(for userId: String) -> AnyPublisher<[Chat], Error>
 	func fetchMessages(chatId: String) -> AnyPublisher<[Message], Error>
-	func fetchUsers() async throws -> [User]
+	func fetchUsersInChats(for userIds: [String]) -> AnyPublisher<[User], Error>
+	func fetchAllUsers() async throws -> [User]
 	func fetchChat(chatId: String) async throws -> Chat?
 	func createChat(chat: Chat) async throws
 	func sendMessage(chatId: String, message: Message) async throws
@@ -37,6 +38,7 @@ final class ChatRepository: ChatRepositoryProtocol {
 		return subject.eraseToAnyPublisher()
 	}
 	
+	// I CAN USE ALREADY FATCHED CHATS TO FIND A SELECTED CHAT THIS IS UNNNECESSARY
 	func fetchChat(chatId: String) async throws -> Chat? {
 		let document = try await db.collection("chats").document(chatId).getDocument()
 		if document.exists {
@@ -48,6 +50,38 @@ final class ChatRepository: ChatRepositoryProtocol {
 	func createChat(chat: Chat) async throws {
 		let chatRef = db.collection("chats").document(chat.id)
 		try chatRef.setData(from: chat)
+	}
+	
+	func fetchAllUsers() async throws -> [User] {
+		let snapshot = try await db.collection("users").getDocuments()
+		return snapshot.documents.compactMap { try? $0.data(as: User.self) }
+	}
+	
+	func fetchUsersInChats(for userIds: [String]) -> AnyPublisher<[User], Error> {
+		let subject = PassthroughSubject<[User], Error>()
+		
+		guard !userIds.isEmpty else {
+			subject.send([])
+			subject.send(completion: .finished)
+			return subject.eraseToAnyPublisher()
+		}
+		
+		db.collection("users")
+			.whereField("id", in: userIds)
+			.addSnapshotListener { snapshot, error in
+				if let error = error {
+					subject.send(completion: .failure(error))
+				} else if let documents = snapshot?.documents {
+					do {
+						let users = try documents.map { try $0.data(as: User.self) }
+						subject.send(users)
+					} catch {
+						subject.send(completion: .failure(error))
+					}
+				}
+			}
+
+		return subject.eraseToAnyPublisher()
 	}
 	
 	func fetchMessages(chatId: String) -> AnyPublisher<[Message], Error> {
@@ -92,8 +126,4 @@ final class ChatRepository: ChatRepositoryProtocol {
 		try await batch.commit()
 	}
 	
-	func fetchUsers() async throws -> [User] {
-		let snapshot = try await db.collection("users").getDocuments()
-		return snapshot.documents.compactMap { try? $0.data(as: User.self) }
-	}
 }

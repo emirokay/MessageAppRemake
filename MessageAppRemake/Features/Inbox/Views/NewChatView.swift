@@ -66,23 +66,7 @@ struct UserRow: View {
 	var body: some View {
 		Button(action: onTap) {
 			HStack {
-				if let url = URL(string: user.profileImageURL ?? "") {
-					AsyncImage(url: url) { image in
-						image
-							.resizable()
-							.scaledToFill()
-							.frame(width: 40, height: 40)
-							.clipShape(Circle())
-					} placeholder: {
-						Circle()
-							.fill(Color.gray.opacity(0.5))
-							.frame(width: 40, height: 40)
-					}
-				} else {
-					Circle()
-						.fill(Color.gray.opacity(0.5))
-						.frame(width: 40, height: 40)
-				}
+				CircularProfileImage(url: user.profileImageURL, size: 40)
 				Text(user.name)
 					.fontWeight(.medium)
 			}

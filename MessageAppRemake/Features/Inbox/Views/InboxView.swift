@@ -30,9 +30,6 @@ struct InboxView: View {
 					.sheet(isPresented: $showNewChatView) {
 						NewChatView(selectedChat: $selectedChat, showSelectedChat: $showSelectedChat)
 					}
-					.onAppear {
-						viewModel.fetchChats()
-					}
 					.navigationDestination(isPresented: $showSelectedChat, destination: {
 						if let chat = selectedChat {
 							MessagesView(chat: chat)
