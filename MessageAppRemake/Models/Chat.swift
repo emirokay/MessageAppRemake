@@ -7,33 +7,58 @@
 
 import Foundation
 
-struct Chat: Identifiable, Codable {
-	let id: String // Firestore document ID
-	let type: ChatType // "individual" or "group"
-	let name: String? // Group name
-	let imageUrl: String? // Group profile picture
-	let members: [String] // Array of User IDs
+struct Chat: Identifiable, Codable, Equatable {
+	let id: String
+	let type: ChatType
+	let name: String
+	let imageUrl: String
+	
+	let memberIds: [String]
 	let lastMessage: String
 	let lastMessageBy: String
 	let lastMessageAt: Date
+	
 	let isPinned: Bool
 	let isMuted: Bool
 	let isRead: Bool
 	let unreadCount: Int
 	let messages: [Message]
-
+	
+	func chatName(for currentUserId: String, users: [User]? = nil) -> String {
+		switch type {
+		case .individual:
+			return otherUser(for: currentUserId, users: users)?.name ?? "Unknown User"
+		case .group:
+			return name
+		}
+	}
+	
+	func displayImageURL(for currentUserId: String, users: [User]? = nil) -> String? {
+		switch type {
+		case .individual:
+			return otherUser(for: currentUserId, users: users)?.profileImageURL
+		case .group:
+			return imageUrl
+		}
+	}
+	
+	private func otherUser(for currentUserId: String, users: [User]?) -> User? {
+		guard type == .individual else { return nil }
+		guard let otherUserId = memberIds.first(where: { $0 != currentUserId }) else { return nil }
+		return users?.first(where: { $0.id == otherUserId })
+	}
+	
 	enum ChatType: String, Codable {
 		case individual
 		case group
 	}
 	
-	// Initializer
-	init(id: String, type: ChatType, name: String? = nil, imageUrl: String? = nil, members: [String], lastMessage: String, lastMessageBy: String, lastMessageAt: Date, isPinned: Bool, isMuted: Bool, isRead: Bool, unreadCount: Int, messages: [Message]) {
+	init(id: String, type: ChatType, name: String, imageUrl: String, memberIds: [String], lastMessage: String, lastMessageBy: String, lastMessageAt: Date, isPinned: Bool, isMuted: Bool, isRead: Bool, unreadCount: Int, messages: [Message]) {
 		self.id = id
 		self.type = type
 		self.name = name
 		self.imageUrl = imageUrl
-		self.members = members
+		self.memberIds = memberIds
 		self.lastMessage = lastMessage
 		self.lastMessageBy = lastMessageBy
 		self.lastMessageAt = lastMessageAt

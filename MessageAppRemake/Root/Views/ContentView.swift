@@ -19,7 +19,9 @@ struct ContentView: View {
 			}
 		}
 		.overlay {
-			LoadingView(show: viewModel.isLoading)
+			if viewModel.isLoading {
+				LoadingView(show: viewModel.isLoading)
+			}
 		}
 		.alert(item: $viewModel.appError) { appError in
 			Alert(

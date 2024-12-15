@@ -7,17 +7,14 @@
 
 import Foundation
 
-import Foundation
-
 struct User: Identifiable, Codable {
-	let id: String // Firestore document ID
-	let name: String
-	let email: String
-	let profileImageURL: String?
-	let about: String?
-
-	// Initializer
-	init(id: String, name: String, email: String, profileImageURL: String? = nil, about: String? = nil) {
+	let id: String
+	var name: String
+	var email: String
+	var profileImageURL: String
+	var about: String
+	
+	init(id: String, name: String, email: String, profileImageURL: String, about: String) {
 		self.id = id
 		self.name = name
 		self.email = email

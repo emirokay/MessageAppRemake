@@ -8,29 +8,29 @@
 import SwiftUI
 
 struct InboxChatRowView: View {
+	@ObservedObject var viewModel: InboxViewModel
 	var chat: Chat
 	
 	var body: some View {
 		HStack {
 			// Profile Image
-			Image(systemName: "person.circle.fill")
+			CircularProfileImage(url: chat.displayImageURL(for: viewModel.currentUserId ?? "", users: viewModel.users))
 			
-			// Chat Info
 			VStack(alignment: .leading, spacing: 4) {
-				// Chat Title and Date
 				HStack {
-					Text(chat.name ?? "Unknown")
+					
+					Text(chat.chatName(for: viewModel.currentUserId ?? "", users: viewModel.users))
 						.font(.headline)
 						.lineLimit(1)
+					
 					Spacer()
 					Text(chat.lastMessageAt.formatted(.dateTime.hour().minute()))
 						.font(.subheadline)
 						.foregroundColor(.gray)
 				}
-
-				// Last Message
+				
 				HStack {
-					if chat.lastMessageBy == UserService.shared.currentUser?.id {
+					if chat.lastMessageBy == viewModel.currentUserId {
 						Image(systemName: "checkmark")
 							.resizable()
 							.frame(width: 12, height: 12)
@@ -41,10 +41,9 @@ struct InboxChatRowView: View {
 						.font(.subheadline)
 						.foregroundColor(.gray)
 						.lineLimit(1)
-
+					
 					Spacer()
-
-					// Icons
+					
 					HStack(spacing: 4) {
 						if chat.isPinned {
 							Image(systemName: "pin.fill")

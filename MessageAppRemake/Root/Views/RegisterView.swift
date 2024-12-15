@@ -21,28 +21,25 @@ struct RegisterView: View {
 			VStack(alignment: .center) {
 				Spacer()
 				
-				// Title Section
 				HeaderView(title: "Sign Up", subtitle: "Create your account to get started.")
 				
 				Spacer()
 				
-				// Input Fields
 				InputFieldView(icon: "person", placeholder: "Full name", text: $fullName)
 				InputFieldView(icon: "envelope", placeholder: "Email", text: $email)
 				InputFieldView(icon: "lock", placeholder: "Password", text: $password, isSecure: true)
 				InputFieldView(icon: "lock", placeholder: "Confirm Password", text: $confirmPassword, isSecure: true)
 				
-				// Sign Up Button
-				Button("Sign Up") {
+				Button {
 					viewModel.createUser(withEmail: email, password: password, confirmPassword: confirmPassword, fullname: fullName)
+				} label: {
+					PrimaryButtonStyle(text: "Sign Up", sysyemImage: "arrow.right", backgroundColor: .blue, width: 120)
 				}
-				.primaryButtonStyle()
 				.padding(.top, 10)
 				
 				Spacer()
 				Spacer()
 				
-				// Login Section
 				HStack {
 					Text("Already have an account?")
 						.foregroundColor(.gray)

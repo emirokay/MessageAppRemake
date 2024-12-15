@@ -6,19 +6,74 @@
 //
 
 import SwiftUI
+import Combine
 
 class ProfileViewModel: ObservableObject {
-	@Published var currentUser: User? = MockData.mocUser
+	@Published var currentUser: User?
 	
-	//Settings
+	private let userService: UserServiceProtocol
+	private let appState: AppStateProtocol
 	let settingsOptions = SettingsOption.allCases
 	
-	func signOut() {
-		//Signout logic
+	init(userService: UserServiceProtocol = UserService.shared, appState: AppStateProtocol = AppState.shared) {
+		self.userService = userService
+		self.appState = appState
+		setupSubscribers()
 	}
 	
-	func deleteAccount() {
-		//Delete account logic 
+	private func setupSubscribers() {
+		userService.currentUserPublisher
+			.receive(on: DispatchQueue.main)
+			.assign(to: &$currentUser)
+	}
+	
+	func signOut(authService: AuthServiceProtocol = AuthService.shared) {
+		performTaskWithLoading {
+			try await authService.signOut()
+		}
+	}
+	//IDK WTF IS THIS
+	func getCurrentUser() -> User {
+		if let user = currentUser {
+			return user
+		}
+		return  User(id: "0", name: "Unknown", email: "Unknown", profileImageURL: "", about: "Unknown")
+	}
+	
+	func deleteAccount(authService: AuthServiceProtocol = AuthService.shared) {
+		performTaskWithLoading {
+			try await authService.deleteAccount()
+		}
+	}
+	
+	func saveUser(name: String, about: String, imageData: Data) {
+		guard var user = currentUser else { return }
+		user.name = name
+		user.about = about
+		
+		performTaskWithLoading {
+			if !imageData.isEmpty {
+				do {
+					let profileUrl = try await self.userService.uploadProfileImage(userId: user.id, imageData: imageData)
+					user.profileImageURL = profileUrl 
+				} catch {
+					throw error
+				}
+			}
+			try await self.userService.uploadUserData(user: user, userId: user.id)
+		}
+	}
+	
+	private func performTaskWithLoading(_ task: @escaping () async throws -> Void) {
+		appState.setLoading(true)
+		Task {
+			do {
+				try await task()
+			} catch {
+				appState.setError("Operation Failed", error.localizedDescription)
+			}
+			appState.setLoading(false)
+		}
 	}
 }
 

@@ -8,98 +8,92 @@
 import SwiftUI
 
 struct MessagesView: View {
-	@State var chat: Chat
-	@State private var messageText = ""
-	@Namespace private var bottomID // To scroll to the last message
+	@Namespace private var bottomID
 	@Environment(\.dismiss) private var dismiss
+	@StateObject var viewModel: MessagesViewModel
+	
+	init(chat: Chat) {
+		_viewModel = StateObject(wrappedValue: MessagesViewModel(chat: chat))
+	}
 	
 	var body: some View {
 		NavigationStack {
 			VStack {
-				// Messages
 				ScrollViewReader { proxy in
 					ScrollView {
-						LazyVStack(spacing: 12) {
-							ForEach(chat.messages) { message in
-								ChatMessageBubble(message: message)
+						LazyVStack {
+							ForEach(viewModel.messages) { message in
+								ChatMessageBubble(message: message, currentUserId: viewModel.currentUserId ?? "")
+									.id(message.id)
 							}
-							// Scroll Anchor
-							Divider().opacity(0).id(bottomID)
 						}
-						.padding(.horizontal)
 					}
-					.onChange(of: chat.messages) {
+					.onChange(of: viewModel.messages) {
 						withAnimation {
-							proxy.scrollTo(bottomID, anchor: .bottom)
+							proxy.scrollTo(viewModel.messages.last?.id, anchor: .bottom)
 						}
 					}
 				}
-				
-				// Input Bar
 				inputBar
 			}
 			.navigationBarBackButtonHidden(true)
 			.toolbar {
-				ToolbarItem(placement: .navigationBarLeading) {
-					customBackButton
-				}
-				ToolbarItem(placement: .navigationBarLeading) {
-					chatHeader
+				ToolbarItem(placement: .topBarLeading) {
+					ChatHeader(chatName: viewModel.chat.name) {
+						dismiss()
+					}
 				}
 			}
-			.toolbar(.hidden, for: .tabBar) // hide tabbar
+			.toolbar(.hidden, for: .tabBar)
 		}
 	}
 	
 	private var inputBar: some View {
 		HStack(spacing: 8) {
-			// Add Image Button
 			Button(action: {
-				// Add image func
+				// Add image functionality
 			}) {
 				Image(systemName: "photo.on.rectangle.angled")
 					.font(.system(size: 24))
 					.foregroundColor(.blue)
 			}
+			.accessibilityLabel("Add Image")
 			
-			// Message field
-			TextField("Message...", text: $messageText)
+			TextField("Message...", text: $viewModel.messageText)
 				.padding(8)
 				.background(Color(.systemGray6))
 				.cornerRadius(20)
-				.textFieldStyle(PlainTextFieldStyle())
+				.accessibilityLabel("Message Text Field")
 			
-			// Send Button
-			Button {} label: {
+			Button {
+				viewModel.sendMessage()
+			} label: {
 				Text("Send")
 					.fontWeight(.bold)
-					.foregroundColor(messageText.isEmpty ? .gray : .blue)
+					.foregroundColor(viewModel.messageText.isEmpty ? .gray : .blue)
 			}
-			.disabled(messageText.isEmpty)
+			.disabled(viewModel.messageText.isEmpty || viewModel.isSending)
+			.accessibilityLabel("Send Message")
 		}
-		.padding(.horizontal)
-		.padding(.vertical, 8)
+		.padding()
 		.background(Color(.systemGray5))
 	}
+}
+
+struct ChatHeader: View {
+	let chatName: String
+	let onBack: () -> Void
 	
-	private var customBackButton: some View {
-		Button {
-			dismiss()
-		} label: {
-			Image(systemName: "chevron.left")
-				.font(.system(size: 16, weight: .medium))
-				.foregroundColor(.blue)
-		}
-	}
-	
-	private var chatHeader: some View {
+	var body: some View {
 		HStack(spacing: 8) {
-			// Profile Image
+			Button(action: onBack) {
+				Image(systemName: "chevron.left")
+					.font(.system(size: 16, weight: .medium))
+					.foregroundColor(.blue)
+			}
 			Image(systemName: "person.fill")
-			
-			// Chat Name -> details
 			VStack(alignment: .leading) {
-				Text(chat.name ?? "Unknown")
+				Text(chatName)
 					.fontWeight(.semibold)
 				Text("Tap for more info")
 					.font(.footnote)
@@ -107,36 +101,61 @@ struct MessagesView: View {
 			}
 		}
 	}
-	
 }
 
-// Message buble - if senderId == viewModel.currentUser.id
 struct ChatMessageBubble: View {
 	let message: Message
+	let currentUserId: String
 	
 	var body: some View {
 		HStack {
-			if message.senderId == "mocUser" {
+			if message.senderId == currentUserId {
 				Spacer()
-				Text(message.text)
-					.padding(10)
-					.foregroundColor(.white)
-					.background(Color.blue)
-					.cornerRadius(20)
-					.frame(maxWidth: UIScreen.main.bounds.width * 0.7, alignment: .trailing)
+				VStack(alignment: .trailing, spacing: 4) {
+					Text(message.text)
+						.padding(10)
+						.foregroundColor(.white)
+						.background(Color.blue)
+						.clipShape(ChatBuble(isFromCurrentUser: true))
+					Text(message.sentAt.formatted(date: .omitted, time: .shortened))
+						.font(.caption2)
+						.foregroundColor(.gray)
+				}
+				.frame(maxWidth: UIScreen.main.bounds.width * 0.7, alignment: .trailing)
 			} else {
-				Text(message.text)
-					.padding(10)
-					.foregroundColor(.black)
-					.background(Color(.systemGray5))
-					.cornerRadius(20)
-					.frame(maxWidth: UIScreen.main.bounds.width * 0.7, alignment: .leading)
+				VStack(alignment: .leading, spacing: 4) {
+					Text(message.text)
+						.padding(10)
+						.foregroundColor(.black)
+						.background(Color(.systemGray5))
+						.clipShape(ChatBuble(isFromCurrentUser: false))
+					Text(message.sentAt.formatted(date: .omitted, time: .shortened))
+						.font(.caption2)
+						.foregroundColor(.gray)
+				}
+				.frame(maxWidth: UIScreen.main.bounds.width * 0.7, alignment: .leading)
 				Spacer()
 			}
 		}
+		.padding(.horizontal, 8)
 	}
 }
 
+struct ChatBuble: Shape {
+	let isFromCurrentUser: Bool
+	
+	func path(in rect: CGRect) -> Path {
+		let bubbleCornerRadius: CGFloat = min(rect.height / 2, 16)
+		let path = UIBezierPath(roundedRect: rect,
+								byRoundingCorners: [
+									.topLeft,
+									.topRight,
+									isFromCurrentUser ? .bottomLeft : .bottomRight
+								],
+								cornerRadii: CGSize(width: bubbleCornerRadius, height: bubbleCornerRadius))
+		return Path(path.cgPath)
+	}
+}
 
 #Preview {
 	MessagesView(chat: MockData.mocChat)

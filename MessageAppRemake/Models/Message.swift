@@ -8,15 +8,14 @@
 import Foundation
 
 struct Message: Identifiable, Codable, Equatable {
-	let id: String // Firestore document ID
-	let chatId: String // ID of the chat this message belongs to
-	let senderId: String // ID of the user who sent the message
+	let id: String
+	let chatId: String
+	let senderId: String
 	let text: String
-	let imageUrl: String? // For media messages
+	let imageUrl: String?
 	let sentAt: Date
-	let seenBy: [String] // Array of user IDs who have seen the message
+	let seenBy: [String]
 	
-	// Initializer
 	init(id: String, chatId: String, senderId: String, text: String, imageUrl: String? = nil, sentAt: Date, seenBy: [String] = []) {
 		self.id = id
 		self.chatId = chatId
