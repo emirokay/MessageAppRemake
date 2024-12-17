@@ -39,7 +39,7 @@ struct MessagesView: View {
 			.navigationBarBackButtonHidden(true)
 			.toolbar {
 				ToolbarItem(placement: .topBarLeading) {
-					ChatHeader(chatName: viewModel.chat.name) {
+					ChatHeader(chat: viewModel.chat, viewModel: viewModel) {
 						dismiss()
 					}
 				}
@@ -81,7 +81,8 @@ struct MessagesView: View {
 }
 
 struct ChatHeader: View {
-	let chatName: String
+	let chat: Chat
+	let viewModel: MessagesViewModel
 	let onBack: () -> Void
 	
 	var body: some View {
@@ -91,15 +92,16 @@ struct ChatHeader: View {
 					.font(.system(size: 16, weight: .medium))
 					.foregroundColor(.blue)
 			}
-			Image(systemName: "person.fill")
+			CircularProfileImage(url: chat.displayImageURL(for: viewModel.currentUserId ?? "", users: viewModel.users), size: 38)
 			VStack(alignment: .leading) {
-				Text(chatName)
+				Text(chat.chatName(for: viewModel.currentUserId ?? "", users: viewModel.users))
 					.fontWeight(.semibold)
 				Text("Tap for more info")
 					.font(.footnote)
 					.foregroundColor(.gray)
 			}
 		}
+		.padding(.vertical, 10)
 	}
 }
 

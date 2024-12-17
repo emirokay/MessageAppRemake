@@ -14,7 +14,7 @@ protocol ChatRepositoryProtocol {
 	func fetchMessages(chatId: String) -> AnyPublisher<[Message], Error>
 	func fetchUsersInChats(for userIds: [String]) -> AnyPublisher<[User], Error>
 	func fetchAllUsers() async throws -> [User]
-	func fetchChat(chatId: String) async throws -> Chat?
+	//func fetchChat(chatId: String) async throws -> Chat?
 	func createChat(chat: Chat) async throws
 	func sendMessage(chatId: String, message: Message) async throws
 	func markMessagesAsSeen(chatId: String, messageIds: [String], userId: String) async throws
@@ -39,13 +39,13 @@ final class ChatRepository: ChatRepositoryProtocol {
 	}
 	
 	// I CAN USE ALREADY FATCHED CHATS TO FIND A SELECTED CHAT THIS IS UNNNECESSARY
-	func fetchChat(chatId: String) async throws -> Chat? {
-		let document = try await db.collection("chats").document(chatId).getDocument()
-		if document.exists {
-			return try document.data(as: Chat.self)
-		}
-		return nil
-	}
+//	func fetchChat(chatId: String) async throws -> Chat? {
+//		let document = try await db.collection("chats").document(chatId).getDocument()
+//		if document.exists {
+//			return try document.data(as: Chat.self)
+//		}
+//		return nil
+//	}
 	
 	func createChat(chat: Chat) async throws {
 		let chatRef = db.collection("chats").document(chat.id)

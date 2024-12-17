@@ -10,17 +10,22 @@ import FirebaseFirestore
 import Combine
 
 class NewChatViewModel: ObservableObject {
-	@Published var users: [User] = []
-	private let chatRepository: ChatRepositoryProtocol
-	private let appState: AppStateProtocol
+	@Published var allUsers: [User] = []
+	@Published var chats: [Chat] = []
 	@Published private var currentUser: User?
-	private var cancellables = Set<AnyCancellable>()
 	@Published var newChat: Chat?
+	
+	private let chatRepository: ChatRepositoryProtocol
+	private let chatStore: ChatStoreProtocol
+	private let appState: AppStateProtocol
+	private var cancellables = Set<AnyCancellable>()
 	
 	init(chatRepository: ChatRepositoryProtocol = ChatRepository(),
 		 userService: UserServiceProtocol = UserService.shared,
+		 chatStore: ChatStoreProtocol = ChatStore.shared,
 		 appState: AppStateProtocol = AppState.shared) {
 		self.chatRepository = chatRepository
+		self.chatStore = chatStore
 		self.appState = appState
 		setupSubscribers(userService: userService)
 		fetchUsers()
@@ -30,6 +35,10 @@ class NewChatViewModel: ObservableObject {
 		userService.currentUserPublisher
 			.receive(on: DispatchQueue.main)
 			.assign(to: &$currentUser)
+		
+		chatStore.chatsPublisher
+			.assign(to: &$chats)
+		
 	}
 	
 	func fetchUsers() {
@@ -38,7 +47,7 @@ class NewChatViewModel: ObservableObject {
 			do {
 				let allUsers = try await chatRepository.fetchAllUsers()
 				DispatchQueue.main.async {
-					self.users = allUsers.filter { $0.id != self.currentUser?.id }
+					self.allUsers = allUsers.filter { $0.id != self.currentUser?.id }
 				}
 			} catch {
 				self.appState.setError("Error Fetching Users", error.localizedDescription)
@@ -48,7 +57,7 @@ class NewChatViewModel: ObservableObject {
 	}
 	
 	func filteredUsers(searchText: String) -> [User] {
-		users.filter { searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }
+		return allUsers.filter { searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }
 	}
 	
 	func startChat(with user: User) {
@@ -58,7 +67,7 @@ class NewChatViewModel: ObservableObject {
 		let chatId = generateChatId(user1: currentUser.id, user2: user.id)
 		Task {
 			do {
-				if let existingChat = try await chatRepository.fetchChat(chatId: chatId) {
+				if let existingChat = self.chats.first(where: { $0.id == chatId }) {
 					await MainActor.run {
 						self.newChat = existingChat
 					}
@@ -81,7 +90,7 @@ class NewChatViewModel: ObservableObject {
 					try await chatRepository.createChat(chat: newChat)
 					await MainActor.run {
 						self.newChat = newChat
-				   }
+					}
 				}
 			} catch {
 				print(error)

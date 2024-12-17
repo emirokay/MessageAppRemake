@@ -9,22 +9,27 @@ import Combine
 import FirebaseFirestore
 
 class MessagesViewModel: ObservableObject {
-	@Published var messages: [Message] = []
-	@Published var messageText: String = ""
-	@Published var isSending: Bool = false
 	@Published var chat: Chat
+	@Published var messages: [Message] = []
+	@Published var users: [User] = []
 	@Published var currentUserId: String?
 	
+	@Published var messageText: String = ""
+	@Published var isSending: Bool = false
+	
 	private let chatRepository: ChatRepositoryProtocol
+	private let chatStore: ChatStoreProtocol
 	private var cancellables = Set<AnyCancellable>()
 	private let appState: AppStateProtocol
 	
 	init(chat: Chat,
 		 chatRepository: ChatRepositoryProtocol = ChatRepository(),
+		 chatStore: ChatStoreProtocol = ChatStore.shared,
 		 userService: UserServiceProtocol = UserService.shared,
 		 appState: AppStateProtocol = AppState.shared) {
 		self.chat = chat
 		self.chatRepository = chatRepository
+		self.chatStore = chatStore
 		self.appState = appState
 		setupSubscribers(userService: userService)
 		fetchMessages()
@@ -38,6 +43,9 @@ class MessagesViewModel: ObservableObject {
 				self?.currentUserId = userId
 			}
 			.store(in: &cancellables)
+		
+		chatStore.usersPublisher
+			.assign(to: &$users)
 	}
 	
 	func fetchMessages() {
