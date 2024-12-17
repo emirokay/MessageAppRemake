@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5F15695C2D088B84009D6751 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 5F15695B2D088B84009D6751 /* Alamofire */; };
+		5F2FDBA12D11D64B00BB3FC6 /* ChatStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F2FDBA02D11D64700BB3FC6 /* ChatStore.swift */; };
 		5F5B0B052CFD316500BBDAFA /* InboxViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F5B0AF32CFD316500BBDAFA /* InboxViewModel.swift */; };
 		5F5B0B062CFD316500BBDAFA /* InboxChatRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F5B0AF52CFD316500BBDAFA /* InboxChatRowView.swift */; };
 		5F5B0B072CFD316500BBDAFA /* InboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F5B0AF62CFD316500BBDAFA /* InboxView.swift */; };
@@ -70,6 +71,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5F2FDBA02D11D64700BB3FC6 /* ChatStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStore.swift; sourceTree = "<group>"; };
 		5F5B0AF32CFD316500BBDAFA /* InboxViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxViewModel.swift; sourceTree = "<group>"; };
 		5F5B0AF52CFD316500BBDAFA /* InboxChatRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxChatRowView.swift; sourceTree = "<group>"; };
 		5F5B0AF62CFD316500BBDAFA /* InboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxView.swift; sourceTree = "<group>"; };
@@ -147,6 +149,7 @@
 		5F5B0AF42CFD316500BBDAFA /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				5F2FDBA02D11D64700BB3FC6 /* ChatStore.swift */,
 				5F5B0AF32CFD316500BBDAFA /* InboxViewModel.swift */,
 				5FD2FEEA2CFE606C0007DF52 /* MessagesViewModel.swift */,
 				5FD2FEEC2CFE69A80007DF52 /* NewChatViewModel.swift */,
@@ -469,6 +472,7 @@
 				5FD2FEED2CFE69A80007DF52 /* NewChatViewModel.swift in Sources */,
 				5F5B0B062CFD316500BBDAFA /* InboxChatRowView.swift in Sources */,
 				5FD2FEEB2CFE606C0007DF52 /* MessagesViewModel.swift in Sources */,
+				5F2FDBA12D11D64B00BB3FC6 /* ChatStore.swift in Sources */,
 				5F5B0B072CFD316500BBDAFA /* InboxView.swift in Sources */,
 				5F5B0B082CFD316500BBDAFA /* MessagesView.swift in Sources */,
 				5F5B0B092CFD316500BBDAFA /* NewChatView.swift in Sources */,

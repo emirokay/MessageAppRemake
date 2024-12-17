@@ -61,7 +61,7 @@ struct CircularProfileImage: View {
 						self.fetchedImage = Image(uiImage: uiImage)
 					}
 				}
-			case .failure(let error):
+			case .failure:
 				DispatchQueue.main.async {
 					self.fetchedImage = placeholder
 				}
