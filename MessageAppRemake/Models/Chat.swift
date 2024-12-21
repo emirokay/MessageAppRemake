@@ -42,7 +42,7 @@ struct Chat: Identifiable, Codable, Equatable {
 		}
 	}
 	
-	private func otherUser(for currentUserId: String, users: [User]?) -> User? {
+	func otherUser(for currentUserId: String, users: [User]?) -> User? {
 		guard type == .individual else { return nil }
 		guard let otherUserId = memberIds.first(where: { $0 != currentUserId }) else { return nil }
 		return users?.first(where: { $0.id == otherUserId })

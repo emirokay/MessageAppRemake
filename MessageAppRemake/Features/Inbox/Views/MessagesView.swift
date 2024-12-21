@@ -6,11 +6,15 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct MessagesView: View {
 	@Namespace private var bottomID
 	@Environment(\.dismiss) private var dismiss
 	@StateObject var viewModel: MessagesViewModel
+	@StateObject var imagePicker = ImagePicker()
+	@State private var selectedImage: Image? = nil
+	@State var messageText: String = ""
 	
 	init(chat: Chat) {
 		_viewModel = StateObject(wrappedValue: MessagesViewModel(chat: chat))
@@ -25,12 +29,17 @@ struct MessagesView: View {
 							ForEach(viewModel.messages) { message in
 								ChatMessageBubble(message: message, currentUserId: viewModel.currentUserId ?? "")
 									.id(message.id)
-							}
+							}.padding(.top, 8)
 						}
 					}
 					.onChange(of: viewModel.messages) {
 						withAnimation {
 							proxy.scrollTo(viewModel.messages.last?.id, anchor: .bottom)
+						}
+					}
+					.overlay {
+						if selectedImage != nil {
+							imageView
 						}
 					}
 				}
@@ -39,41 +48,71 @@ struct MessagesView: View {
 			.navigationBarBackButtonHidden(true)
 			.toolbar {
 				ToolbarItem(placement: .topBarLeading) {
-					ChatHeader(chat: viewModel.chat, viewModel: viewModel) {
-						dismiss()
-					}
+					NavigationLink {
+						UserDetailsView(user: viewModel.chat.otherUser(for: viewModel.currentUserId ?? "", users: viewModel.users))
+					} label: {
+						ChatHeader(chat: viewModel.chat, viewModel: viewModel) {
+							dismiss()
+						}
+					}.foregroundStyle(.primary)
 				}
 			}
 			.toolbar(.hidden, for: .tabBar)
+			.onChange(of: imagePicker.image) {
+				selectedImage = imagePicker.image
+			}
 		}
+	}
+	
+	private var imageView: some View {
+		ZStack {
+			Color.black.opacity(0.8)
+			selectedImage!
+				.resizable()
+				.scaledToFit()
+				.frame(maxHeight: 500)
+			VStack {
+				HStack {
+					Spacer()
+					Button {
+						imagePicker.clearSelections()
+					} label: {
+						Image(systemName: "xmark.circle.fill")
+							.resizable()
+							.frame(width: 32, height: 32)
+							.foregroundStyle(.white).opacity(0.8)
+							.padding()
+					}
+				}
+				Spacer()
+			}
+		}
+		.offset(y: 7)
 	}
 	
 	private var inputBar: some View {
 		HStack(spacing: 8) {
-			Button(action: {
-				// Add image functionality
-			}) {
+			PhotosPicker(selection: $imagePicker.imageSelection, matching: .images) {
 				Image(systemName: "photo.on.rectangle.angled")
 					.font(.system(size: 24))
 					.foregroundColor(.blue)
 			}
-			.accessibilityLabel("Add Image")
 			
-			TextField("Message...", text: $viewModel.messageText)
+			TextField("Message...", text: $messageText)
 				.padding(8)
 				.background(Color(.systemGray6))
 				.cornerRadius(20)
-				.accessibilityLabel("Message Text Field")
 			
 			Button {
-				viewModel.sendMessage()
+				viewModel.sendMessage(messageText: messageText, imageData: imagePicker.imageData)
+				messageText = ""
+				imagePicker.clearSelections()
 			} label: {
 				Text("Send")
 					.fontWeight(.bold)
-					.foregroundColor(viewModel.messageText.isEmpty ? .gray : .blue)
+					.foregroundColor(!messageText.isEmpty || selectedImage != nil ? .blue : .gray)
 			}
-			.disabled(viewModel.messageText.isEmpty || viewModel.isSending)
-			.accessibilityLabel("Send Message")
+			.disabled(!(messageText.isEmpty == false || selectedImage != nil) || viewModel.isSending)
 		}
 		.padding()
 		.background(Color(.systemGray5))
@@ -92,7 +131,8 @@ struct ChatHeader: View {
 					.font(.system(size: 16, weight: .medium))
 					.foregroundColor(.blue)
 			}
-			CircularProfileImage(url: chat.displayImageURL(for: viewModel.currentUserId ?? "", users: viewModel.users), size: 38)
+			.padding(.trailing)
+			CircularProfileImage(url: chat.displayImageURL(for: viewModel.currentUserId ?? "", users: viewModel.users), wSize: 35, hSize: 35)
 			VStack(alignment: .leading) {
 				Text(chat.chatName(for: viewModel.currentUserId ?? "", users: viewModel.users))
 					.fontWeight(.semibold)
@@ -114,11 +154,19 @@ struct ChatMessageBubble: View {
 			if message.senderId == currentUserId {
 				Spacer()
 				VStack(alignment: .trailing, spacing: 4) {
-					Text(message.text)
-						.padding(10)
-						.foregroundColor(.white)
-						.background(Color.blue)
-						.clipShape(ChatBuble(isFromCurrentUser: true))
+					VStack(alignment: .leading) {
+						if message.imageUrl != "" {
+							CircularProfileImage(url: message.imageUrl, wSize: 300, hSize: 200, shape: AnyShape(RoundedRectangle(cornerRadius: 10)))
+						}
+						if message.text != "" {
+							Text(message.text)
+								.foregroundColor(.white)
+						}
+					}
+					.padding(8)
+					.background(Color.blue)
+					.clipShape(ChatBuble(isFromCurrentUser: true))
+					
 					Text(message.sentAt.formatted(date: .omitted, time: .shortened))
 						.font(.caption2)
 						.foregroundColor(.gray)

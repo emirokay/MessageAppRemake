@@ -63,6 +63,7 @@
 		5FB0B1072CF3E6A000111712 /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 5FB0B1062CF3E6A000111712 /* FirebaseStorageCombine-Community */; };
 		5FB0B1092CF3E6A000111712 /* FirebaseVertexAI in Frameworks */ = {isa = PBXBuildFile; productRef = 5FB0B1082CF3E6A000111712 /* FirebaseVertexAI */; };
 		5FB6A44A2CF63C60000AB790 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5FB6A4492CF63C60000AB790 /* GoogleService-Info.plist */; };
+		5FB8F33C2D1235A000C82D91 /* UserDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FB8F33B2D12359D00C82D91 /* UserDetailsView.swift */; };
 		5FD2FEEB2CFE606C0007DF52 /* MessagesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FD2FEEA2CFE606C0007DF52 /* MessagesViewModel.swift */; };
 		5FD2FEED2CFE69A80007DF52 /* NewChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FD2FEEC2CFE69A80007DF52 /* NewChatViewModel.swift */; };
 		5FD2FEEF2CFE830F0007DF52 /* ChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FD2FEEE2CFE830F0007DF52 /* ChatRepository.swift */; };
@@ -103,6 +104,7 @@
 		5F63EDAB2CF2B06400DBCABD /* MessageAppRemakeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageAppRemakeApp.swift; sourceTree = "<group>"; };
 		5F7A6BDF2CFF8A2200A2CF1D /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditView.swift; sourceTree = "<group>"; };
 		5FB6A4492CF63C60000AB790 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		5FB8F33B2D12359D00C82D91 /* UserDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDetailsView.swift; sourceTree = "<group>"; };
 		5FD2FEEA2CFE606C0007DF52 /* MessagesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesViewModel.swift; sourceTree = "<group>"; };
 		5FD2FEEC2CFE69A80007DF52 /* NewChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewChatViewModel.swift; sourceTree = "<group>"; };
 		5FD2FEEE2CFE830F0007DF52 /* ChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRepository.swift; sourceTree = "<group>"; };
@@ -160,6 +162,7 @@
 		5F5B0AFA2CFD316500BBDAFA /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				5FB8F33B2D12359D00C82D91 /* UserDetailsView.swift */,
 				5F5B0AF52CFD316500BBDAFA /* InboxChatRowView.swift */,
 				5F5B0AF62CFD316500BBDAFA /* InboxView.swift */,
 				5F5B0AF72CFD316500BBDAFA /* MessagesView.swift */,
@@ -304,13 +307,6 @@
 			path = Managers;
 			sourceTree = "<group>";
 		};
-		5F5B0B332CFD319000BBDAFA /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Extensions;
-			sourceTree = "<group>";
-		};
 		5F5B0B392CFD319400BBDAFA /* Components */ = {
 			isa = PBXGroup;
 			children = (
@@ -352,7 +348,6 @@
 				5F63EDA92CF2B06400DBCABD /* Assets.xcassets */,
 				5FB6A4492CF63C60000AB790 /* GoogleService-Info.plist */,
 				5F5B0B392CFD319400BBDAFA /* Components */,
-				5F5B0B332CFD319000BBDAFA /* Extensions */,
 				5F5B0B302CFD318D00BBDAFA /* Managers */,
 				5F5B0B292CFD318200BBDAFA /* Models */,
 				5F5B0B1C2CFD317A00BBDAFA /* ViewModifiers */,
@@ -496,6 +491,7 @@
 				5F5B0B1D2CFD317A00BBDAFA /* PrimaryButtonStyle.swift in Sources */,
 				5F5B0B162CFD317300BBDAFA /* ContentViewModel.swift in Sources */,
 				5F5B0B172CFD317300BBDAFA /* ContentView.swift in Sources */,
+				5FB8F33C2D1235A000C82D91 /* UserDetailsView.swift in Sources */,
 				5F5B0B182CFD317300BBDAFA /* LoginView.swift in Sources */,
 				5F5B0B312CFD318D00BBDAFA /* AppState.swift in Sources */,
 				5F5B0B192CFD317300BBDAFA /* RegisterView.swift in Sources */,

@@ -7,6 +7,7 @@
 
 import Foundation
 import FirebaseFirestore
+import FirebaseStorage
 import Combine
 
 protocol ChatRepositoryProtocol {
@@ -16,11 +17,13 @@ protocol ChatRepositoryProtocol {
 	func fetchAllUsers() async throws -> [User]
 	func createChat(chat: Chat) async throws
 	func sendMessage(chatId: String, message: Message) async throws
+	func uploadImage(chatId: String, imageData: Data, isGroup: Bool) async throws -> String
 	func markMessagesAsSeen(chatId: String, messageIds: [String], userId: String) async throws
 }
 
 final class ChatRepository: ChatRepositoryProtocol {
 	private let db = Firestore.firestore()
+	private let storage = Storage.storage()
 	
 	func fetchChats(for userId: String) -> AnyPublisher<[Chat], Error> {
 		let subject = PassthroughSubject<[Chat], Error>()
@@ -70,7 +73,7 @@ final class ChatRepository: ChatRepositoryProtocol {
 					}
 				}
 			}
-
+		
 		return subject.eraseToAnyPublisher()
 	}
 	
@@ -103,6 +106,17 @@ final class ChatRepository: ChatRepositoryProtocol {
 			"lastMessageAt": Timestamp(date: message.sentAt)
 		], forDocument: chatRef)
 		try await batch.commit()
+	}
+	
+	func uploadImage(chatId: String, imageData: Data, isGroup: Bool) async throws -> String {
+		let imageId = UUID().uuidString
+		
+		let path = isGroup ? "GroupProfileImages" : "MessageImages"
+		let storageRef = storage.reference().child("\(path)/\(chatId)/\(imageId).jpg")
+		
+		let _ = try await storageRef.putDataAsync(imageData)
+		
+		return try await storageRef.downloadURL().absoluteString
 	}
 	
 	func markMessagesAsSeen(chatId: String, messageIds: [String], userId: String) async throws {

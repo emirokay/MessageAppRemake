@@ -16,7 +16,7 @@ struct NewChatView: View {
 				List {
 					Section {
 						ZStack(alignment: .leading) {
-							NavigationLink(destination: NewGroupChatView()) {
+							NavigationLink(destination: NewGroupChatView(viewModel: viewModel)) {
 								EmptyView()
 							}
 							.opacity(0.0)
@@ -28,8 +28,8 @@ struct NewChatView: View {
 					Section("Friends") {
 						ForEach(viewModel.filteredUsers(searchText: searchText)) { user in
 							UserRow(user: user) {
-								viewModel.startChat(with: user)
-							}
+								viewModel.startChat(with: [user])
+							}.foregroundStyle(.primary)
 						}
 					}
 				}
@@ -66,7 +66,7 @@ struct UserRow: View {
 	var body: some View {
 		Button(action: onTap) {
 			HStack {
-				CircularProfileImage(url: user.profileImageURL, size: 40)
+				CircularProfileImage(url: user.profileImageURL, wSize: 40, hSize: 40)
 				Text(user.name)
 					.fontWeight(.medium)
 			}
