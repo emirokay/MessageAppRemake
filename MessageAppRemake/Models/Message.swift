@@ -12,11 +12,11 @@ struct Message: Identifiable, Codable, Equatable {
 	let chatId: String
 	let senderId: String
 	let text: String
-	let imageUrl: String?
+	let imageUrl: String
 	let sentAt: Date
 	let seenBy: [String]
 	
-	init(id: String, chatId: String, senderId: String, text: String, imageUrl: String? = nil, sentAt: Date, seenBy: [String] = []) {
+	init(id: String, chatId: String, senderId: String, text: String, imageUrl: String, sentAt: Date, seenBy: [String] = []) {
 		self.id = id
 		self.chatId = chatId
 		self.senderId = senderId

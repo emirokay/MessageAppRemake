@@ -60,48 +60,64 @@ class NewChatViewModel: ObservableObject {
 		return allUsers.filter { searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }
 	}
 	
-	func startChat(with user: User) {
+	func startChat(with users: [User], chatName: String = "", imageData: Data? = nil) {
 		guard let currentUser else { return }
 		
 		appState.setLoading(true)
-		let chatId = generateChatId(user1: currentUser.id, user2: user.id)
+		let userIds = users.map { $0.id } + [currentUser.id]
+		let chatId = generateChatId(users: userIds)
+		
+		if let existingChat = self.chats.first(where: { $0.id == chatId }) {
+			Task {
+				await MainActor.run {
+					self.newChat = existingChat
+				}
+				appState.setLoading(false)
+			}
+		} else {
+			Task {
+				let isGroup = users.count > 1
+				let finalChatName = !chatName.isEmpty ? chatName : (isGroup ? "New Group Chat" : "New Chat")
+				let imageUrl = try? await (imageData != nil ? chatRepository.uploadImage(chatId: chatId, imageData: imageData!, isGroup: isGroup) : "")
+				
+				handleNewChat(userIds: userIds, chatName: finalChatName, imageUrl: imageUrl ?? "", chatId: chatId, isGroup: isGroup)
+				appState.setLoading(false)
+			}
+		}
+	}
+	
+	private func handleNewChat(userIds: [String], chatName: String, imageUrl: String, chatId: String, isGroup: Bool) {
 		Task {
 			do {
-				if let existingChat = self.chats.first(where: { $0.id == chatId }) {
-					await MainActor.run {
-						self.newChat = existingChat
-					}
-				} else {
-					let newChat = Chat(
-						id: chatId,
-						type: .individual,
-						name: user.name,
-						imageUrl: "",
-						memberIds: [currentUser.id, user.id],
-						lastMessage: "",
-						lastMessageBy: "",
-						lastMessageAt: Date(),
-						isPinned: false,
-						isMuted: false,
-						isRead: false,
-						unreadCount: 0,
-						messages: []
-					)
-					try await chatRepository.createChat(chat: newChat)
-					await MainActor.run {
-						self.newChat = newChat
-					}
+				let newChat = Chat(
+					id: chatId,
+					type: isGroup ? .group : .individual,
+					name: chatName,
+					imageUrl: imageUrl,
+					memberIds: userIds,
+					lastMessage: "",
+					lastMessageBy: "",
+					lastMessageAt: Date(),
+					isPinned: false,
+					isMuted: false,
+					isRead: false,
+					unreadCount: 0,
+					messages: []
+				)
+				try await chatRepository.createChat(chat: newChat)
+				await MainActor.run {
+					self.newChat = newChat
 				}
 			} catch {
 				print(error)
 				print(error.localizedDescription)
-				appState.setError("Error Starting Chat", error.localizedDescription)
+				appState.setError("Error Creating Chat", error.localizedDescription)
 			}
-			appState.setLoading(false)
 		}
 	}
 	
-	private func generateChatId(user1: String, user2: String) -> String {
-		return [user1, user2].sorted().joined(separator: "_")
+	private func generateChatId(users: [String]) -> String {
+		let hash = users.sorted().joined(separator: "_").hashValue
+		return "chat_\(hash)"
 	}
 }

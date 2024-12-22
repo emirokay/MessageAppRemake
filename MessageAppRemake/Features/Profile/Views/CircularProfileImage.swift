@@ -12,33 +12,37 @@ struct CircularProfileImage: View {
 	var image: Image? = nil
 	var url: String? = nil
 	var placeholder: Image = Image("nullProfile")
-	var size: CGFloat = 64
-
+	var wSize: CGFloat = 64
+	var hSize: CGFloat = 64
+	var shape: AnyShape = AnyShape(Circle())
+	
 	@State private var fetchedImage: Image? = nil
-
+	
 	var body: some View {
 		ZStack {
 			if let image = image ?? fetchedImage {
 				image
 					.resizable()
 					.scaledToFill()
-					.frame(width: size, height: size)
-					.clipShape(Circle())
+					.frame(width: wSize, height: hSize)
+					.clipShape(shape)
 			} else {
 				placeholder
 					.resizable()
 					.scaledToFill()
-					.frame(width: size, height: size)
-					.clipShape(Circle())
+					.frame(width: wSize, height: hSize)
+					.clipShape(shape)
 					.overlay(
 						ProgressView()
-							.frame(width: size / 2, height: size / 2)
+							.frame(width: wSize / 2, height: hSize / 2)
 					)
 			}
 		}
 		.onAppear {
 			if let url = url {
 				fetchImage(from: url)
+			} else if url == nil && image == nil {
+				fetchedImage = placeholder
 			}
 		}
 		.onChange(of: url) {
@@ -67,5 +71,19 @@ struct CircularProfileImage: View {
 				}
 			}
 		}
+	}
+}
+
+struct AnyShape: Shape {
+	private let _path: (CGRect) -> Path
+	
+	init<S: Shape>(_ shape: S) {
+		self._path = { rect in
+			shape.path(in: rect)
+		}
+	}
+	
+	func path(in rect: CGRect) -> Path {
+		_path(rect)
 	}
 }

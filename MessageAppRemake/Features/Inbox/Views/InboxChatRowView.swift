@@ -37,7 +37,7 @@ struct InboxChatRowView: View {
 							.foregroundColor(chat.isRead ? .blue : .gray)
 					}
 					
-					Text(chat.lastMessage)
+					Text(!chat.lastMessage.isEmpty ? chat.lastMessage : "Photo" )
 						.font(.subheadline)
 						.foregroundColor(.gray)
 						.lineLimit(1)

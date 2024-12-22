@@ -17,7 +17,7 @@ struct ProfileView: View {
 				NavigationLink {
 					ProfileEditView(viewModel: viewModel)
 				} label: {
-					CircularProfileImage(url: viewModel.getCurrentUser().profileImageURL, size: 100)
+					CircularProfileImage(url: viewModel.getCurrentUser().profileImageURL, wSize: 100, hSize: 100)
 					VStack(alignment: .leading) {
 						Text(viewModel.getCurrentUser().name)
 							.font(.title3)

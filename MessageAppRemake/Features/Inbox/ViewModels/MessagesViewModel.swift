@@ -13,8 +13,6 @@ class MessagesViewModel: ObservableObject {
 	@Published var messages: [Message] = []
 	@Published var users: [User] = []
 	@Published var currentUserId: String?
-	
-	@Published var messageText: String = ""
 	@Published var isSending: Bool = false
 	
 	private let chatRepository: ChatRepositoryProtocol
@@ -61,28 +59,46 @@ class MessagesViewModel: ObservableObject {
 			.store(in: &cancellables)
 	}
 	
-	func sendMessage() {
-		guard !messageText.isEmpty, let currentUserId else { return }
+	func sendMessage(messageText: String, imageData: Data?) {
 		
 		isSending = true
+		
+		if let imageData = imageData {
+			Task {
+				do {
+					let imageUrl = try await chatRepository.uploadImage(chatId: chat.id, imageData: imageData, isGroup: false)
+					sendMessageWithUrl(messageText: messageText, imageUrl: imageUrl)
+				} catch {
+					self.appState.setError("Error uploading image", error.localizedDescription)
+				}
+			}
+		} else {
+			sendMessageWithUrl(messageText: messageText, imageUrl: "")
+		}
+	}
+	
+	private func sendMessageWithUrl(messageText: String, imageUrl: String) {
+		guard let currentUserId else { return }
+		
 		let newMessage = Message(
 			id: UUID().uuidString,
 			chatId: chat.id,
 			senderId: currentUserId,
 			text: messageText,
-			sentAt: Date()
-		)
+			imageUrl: imageUrl,
+			sentAt: Date(),
+			seenBy: []
+		) 
 		
 		Task {
 			do {
 				try await chatRepository.sendMessage(chatId: chat.id, message: newMessage)
 				DispatchQueue.main.async {
 					self.isSending = false
-					self.messageText = ""
 				}
 			} catch {
 				self.isSending = false
-				self.appState.setError("Error sending messages", error.localizedDescription)
+				self.appState.setError("Error sending message", error.localizedDescription)
 			}
 		}
 	}

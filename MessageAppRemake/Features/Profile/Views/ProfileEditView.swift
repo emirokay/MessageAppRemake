@@ -17,6 +17,7 @@ struct ProfileEditView: View {
 	@State private var showAboutView = false
 	@State private var showEdit = false
 	@Environment(\.dismiss) private var dismiss
+	@State private var showImagePicker = false
 	
 	init(viewModel: ProfileViewModel) {
 		_viewModel = ObservedObject(wrappedValue: viewModel)
@@ -37,13 +38,23 @@ struct ProfileEditView: View {
 			List {
 				Section {
 					HStack {
-						PhotosPicker(selection: $imagePicker.imageSelection, matching: .images) {
-							if let selectedImage = selectedImage {
-								CircularProfileImage(image: selectedImage)
-							} else {
-								CircularProfileImage(url: viewModel.getCurrentUser().profileImageURL)
+						CircularProfileImage(image: selectedImage, url: viewModel.getCurrentUser().profileImageURL)
+							.onTapGesture {
+								showImagePicker = true
 							}
-						}
+							.overlay {
+								Image(systemName: selectedImage != nil ? "xmark.circle.fill" : "plus.circle.fill")
+									.font(.title2)
+									.foregroundStyle(selectedImage != nil ? .gray : .blue)
+									.offset(x:25 , y: -25)
+									.onTapGesture {
+										if selectedImage != nil {
+											imagePicker.clearSelections()
+										} else {
+											showImagePicker = true
+										}
+									}
+							}
 						Text("Enter your name and choose a profile picture")
 					}
 					TextField("Enter your name", text: $name)
@@ -54,6 +65,7 @@ struct ProfileEditView: View {
 				}
 				AboutSection(about: $about, showAboutView: $showAboutView)
 			}
+			.photosPicker(isPresented: $showImagePicker, selection: $imagePicker.imageSelection, matching: .images)
 			.navigationTitle("Edit Profile")
 			.navigationBarTitleDisplayMode(.inline)
 			.navigationBarBackButtonHidden()
