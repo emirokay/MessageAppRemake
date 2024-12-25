@@ -34,10 +34,10 @@ struct InboxChatRowView: View {
 						Image(systemName: "checkmark")
 							.resizable()
 							.frame(width: 12, height: 12)
-							.foregroundColor(chat.isRead ? .blue : .gray)
+							.foregroundColor(chat.isRead.contains(viewModel.currentUserId ?? "") ? .blue : .gray)
 					}
 					
-					Text(!chat.lastMessage.isEmpty ? chat.lastMessage : "Photo" )
+					Text(chat.lastMessage)
 						.font(.subheadline)
 						.foregroundColor(.gray)
 						.lineLimit(1)
@@ -45,11 +45,11 @@ struct InboxChatRowView: View {
 					Spacer()
 					
 					HStack(spacing: 4) {
-						if chat.isPinned {
+						if chat.isPinned.contains(viewModel.currentUserId ?? "") {
 							Image(systemName: "pin.fill")
 								.foregroundColor(.gray)
 						}
-						if chat.isMuted {
+						if chat.isMuted.contains(viewModel.currentUserId ?? "") {
 							Image(systemName: "bell.slash.fill")
 								.foregroundColor(.gray)
 						}

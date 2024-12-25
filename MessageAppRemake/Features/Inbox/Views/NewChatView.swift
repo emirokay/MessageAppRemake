@@ -17,10 +17,8 @@ struct NewChatView: View {
 					Section {
 						ZStack(alignment: .leading) {
 							NavigationLink(destination: NewGroupChatView(viewModel: viewModel)) {
-								EmptyView()
-							}
-							.opacity(0.0)
-							Label("New Group", systemImage: "person.2")
+								Label("New Group", systemImage: "person.2")
+							} 
 						}
 					}
 					
@@ -51,9 +49,6 @@ struct NewChatView: View {
 				dismiss()
 				self.selectedChat = viewModel.newChat
 				self.showSelectedChat = true
-			}
-			.onAppear {
-				viewModel.fetchUsers()
 			}
 		}
 	}

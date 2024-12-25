@@ -68,7 +68,7 @@ struct InboxView: View {
 		Button {
 			
 		} label: {
-			Label("Pin chat", systemImage: chat.isPinned ? "pin.slash.fill" : "pin.fill")
+			Label("Pin chat", systemImage: chat.isPinned.contains(viewModel.currentUserId ?? "") ? "pin.slash.fill" : "pin.fill")
 		}
 		.tint(.gray)
 	}
@@ -77,7 +77,7 @@ struct InboxView: View {
 		Button {
 			
 		} label: {
-			Label("Mute", systemImage: chat.isMuted ? "bell.fill" : "bell.slash.fill")
+			Label("Mute", systemImage: chat.isMuted.contains(viewModel.currentUserId ?? "") ? "bell.fill" : "bell.slash.fill")
 		}
 		.tint(.orange)
 	}
