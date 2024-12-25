@@ -36,6 +36,9 @@ struct MessagesView: View {
 			.onChange(of: imagePicker.image) {
 				selectedImage = imagePicker.image
 			}
+			.onChange(of: viewModel.exitGroup) {
+				dismiss()
+			}
 		}
 	}
 	
@@ -130,11 +133,23 @@ struct MessagesView: View {
 	
 	private var chatHeader: some View {
 		NavigationLink {
-			UserDetailsView(user: viewModel.chat.otherUser(for: viewModel.currentUserId ?? "", users: viewModel.users))
+			if viewModel.chat.type == .individual {
+				if let currentUserId = viewModel.currentUserId {
+					UserDetailsView(
+						user: viewModel.chat.otherUser(for: currentUserId, users: viewModel.users)
+					)
+				}
+			} else {
+				if let currentUser = viewModel.currentUser {
+					GroupChatDetailsView(
+						currentUser: currentUser,
+						viewModel: viewModel
+					)
+				}
+			}
 		} label: {
 			ChatHeader(chat: viewModel.chat, viewModel: viewModel, onBack: { dismiss() })
-		}
-		.foregroundStyle(.primary)
+		}.foregroundStyle(.primary)
 	}
 }
 

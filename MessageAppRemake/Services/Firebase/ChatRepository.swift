@@ -18,6 +18,7 @@ protocol ChatRepositoryProtocol {
 	func createChat(chat: Chat) async throws
 	func sendMessage(chatId: String, message: Message) async throws
 	func uploadImage(chatId: String, imageData: Data, isGroup: Bool) async throws -> String
+	func uploadChatData(chat: Chat, userId: String) async throws 
 	func markMessagesAsSeen(chatId: String, messageIds: [String], userId: String) async throws
 }
 
@@ -95,13 +96,18 @@ final class ChatRepository: ChatRepositoryProtocol {
 	}
 	
 	func sendMessage(chatId: String, message: Message) async throws {
+		var lastMessage = message.text
+		if message.text.isEmpty && !message.imageUrl.isEmpty {
+			lastMessage = "Photo"
+		}
+		
 		let chatRef = db.collection("chats").document(chatId)
 		let messageRef = chatRef.collection("messages").document(message.id)
 		
 		let batch = db.batch()
 		try batch.setData(from: message, forDocument: messageRef)
 		batch.updateData([
-			"lastMessage": message.text,
+			"lastMessage": lastMessage,
 			"lastMessageBy": message.senderId,
 			"lastMessageAt": Timestamp(date: message.sentAt)
 		], forDocument: chatRef)
@@ -111,12 +117,22 @@ final class ChatRepository: ChatRepositoryProtocol {
 	func uploadImage(chatId: String, imageData: Data, isGroup: Bool) async throws -> String {
 		let imageId = UUID().uuidString
 		
-		let path = isGroup ? "GroupProfileImages" : "MessageImages"
-		let storageRef = storage.reference().child("\(path)/\(chatId)/\(imageId).jpg")
+		let path = isGroup ? "GroupProfileImages/\(chatId).jpg" : "MessageImages/\(chatId)/\(imageId).jpg"
+		let storageRef =  storage.reference().child(path)
 		
 		let _ = try await storageRef.putDataAsync(imageData)
 		
 		return try await storageRef.downloadURL().absoluteString
+	}
+	
+	func uploadChatData(chat: Chat, userId: String) async throws {
+		do {
+			let encodedChat = try Firestore.Encoder().encode(chat)
+			try await db.collection("chats").document(chat.id).setData(encodedChat)
+			
+		} catch {
+			throw error
+		}
 	}
 	
 	func markMessagesAsSeen(chatId: String, messageIds: [String], userId: String) async throws {

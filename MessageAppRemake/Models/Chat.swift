@@ -10,19 +10,24 @@ import Foundation
 struct Chat: Identifiable, Codable, Equatable {
 	let id: String
 	let type: ChatType
-	let name: String
-	let imageUrl: String
+	var name: String
+	var imageUrl: String
 	
-	let memberIds: [String]
-	let lastMessage: String
-	let lastMessageBy: String
-	let lastMessageAt: Date
+	var memberIds: [String]
+	var lastMessage: String
+	var lastMessageBy: String
+	var lastMessageAt: Date
 	
-	let isPinned: Bool
-	let isMuted: Bool
-	let isRead: Bool
-	let unreadCount: Int
-	let messages: [Message]
+	let createdBy: String
+	let createdAt: Date
+	var bio: String
+	var admins: [String]
+	var isPinned: [String]
+	var isMuted: [String]
+	var isRead: [String]
+	
+	var unreadCount: Int
+	var messages: [Message]
 	
 	func chatName(for currentUserId: String, users: [User]? = nil) -> String {
 		switch type {
@@ -53,7 +58,7 @@ struct Chat: Identifiable, Codable, Equatable {
 		case group
 	}
 	
-	init(id: String, type: ChatType, name: String, imageUrl: String, memberIds: [String], lastMessage: String, lastMessageBy: String, lastMessageAt: Date, isPinned: Bool, isMuted: Bool, isRead: Bool, unreadCount: Int, messages: [Message]) {
+	init(id: String, type: ChatType, name: String, imageUrl: String, memberIds: [String], lastMessage: String, lastMessageBy: String, lastMessageAt: Date, createdBy: String, createdAt: Date, bio: String, admins: [String], isPinned: [String], isMuted: [String], isRead: [String], unreadCount: Int, messages: [Message]) {
 		self.id = id
 		self.type = type
 		self.name = name
@@ -62,9 +67,15 @@ struct Chat: Identifiable, Codable, Equatable {
 		self.lastMessage = lastMessage
 		self.lastMessageBy = lastMessageBy
 		self.lastMessageAt = lastMessageAt
+		
+		self.createdBy = createdBy
+		self.createdAt = createdAt
+		self.bio = bio
+		self.admins = admins
 		self.isPinned = isPinned
 		self.isMuted = isMuted
 		self.isRead = isRead
+		
 		self.unreadCount = unreadCount
 		self.messages = messages
 	}

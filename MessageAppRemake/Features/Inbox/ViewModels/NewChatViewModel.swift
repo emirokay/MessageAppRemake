@@ -28,7 +28,7 @@ class NewChatViewModel: ObservableObject {
 		self.chatStore = chatStore
 		self.appState = appState
 		setupSubscribers(userService: userService)
-		fetchUsers()
+		chatStore.fetchAllUsers()
 	}
 	
 	private func setupSubscribers(userService: UserServiceProtocol) {
@@ -39,21 +39,9 @@ class NewChatViewModel: ObservableObject {
 		chatStore.chatsPublisher
 			.assign(to: &$chats)
 		
-	}
-	
-	func fetchUsers() {
-		appState.setLoading(true)
-		Task {
-			do {
-				let allUsers = try await chatRepository.fetchAllUsers()
-				DispatchQueue.main.async {
-					self.allUsers = allUsers.filter { $0.id != self.currentUser?.id }
-				}
-			} catch {
-				self.appState.setError("Error Fetching Users", error.localizedDescription)
-			}
-			self.appState.setLoading(false)
-		}
+		chatStore.allUsersPublisher
+			.assign(to: &$allUsers)
+		
 	}
 	
 	func filteredUsers(searchText: String) -> [User] {
@@ -80,13 +68,13 @@ class NewChatViewModel: ObservableObject {
 				let finalChatName = !chatName.isEmpty ? chatName : (isGroup ? "New Group Chat" : "New Chat")
 				let imageUrl = try? await (imageData != nil ? chatRepository.uploadImage(chatId: chatId, imageData: imageData!, isGroup: isGroup) : "")
 				
-				handleNewChat(userIds: userIds, chatName: finalChatName, imageUrl: imageUrl ?? "", chatId: chatId, isGroup: isGroup)
+				handleNewChat(userIds: userIds, chatName: finalChatName, imageUrl: imageUrl ?? "", chatId: chatId, isGroup: isGroup, currentUserId: currentUser.id)
 				appState.setLoading(false)
 			}
 		}
 	}
 	
-	private func handleNewChat(userIds: [String], chatName: String, imageUrl: String, chatId: String, isGroup: Bool) {
+	private func handleNewChat(userIds: [String], chatName: String, imageUrl: String, chatId: String, isGroup: Bool, currentUserId: String) {
 		Task {
 			do {
 				let newChat = Chat(
@@ -98,12 +86,17 @@ class NewChatViewModel: ObservableObject {
 					lastMessage: "",
 					lastMessageBy: "",
 					lastMessageAt: Date(),
-					isPinned: false,
-					isMuted: false,
-					isRead: false,
+					createdBy: currentUserId,
+					createdAt: Date(),
+					bio: "",
+					admins: [currentUserId],
+					isPinned: [],
+					isMuted: [],
+					isRead: [],
 					unreadCount: 0,
 					messages: []
 				)
+				
 				try await chatRepository.createChat(chat: newChat)
 				await MainActor.run {
 					self.newChat = newChat

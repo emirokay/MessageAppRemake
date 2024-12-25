@@ -46,6 +46,8 @@ struct ProfileEditView: View {
 								Image(systemName: selectedImage != nil ? "xmark.circle.fill" : "plus.circle.fill")
 									.font(.title2)
 									.foregroundStyle(selectedImage != nil ? .gray : .blue)
+									.background(.white)
+									.clipShape(Circle())
 									.offset(x:25 , y: -25)
 									.onTapGesture {
 										if selectedImage != nil {
@@ -95,80 +97,46 @@ struct ProfileEditView: View {
 						})
 						.foregroundStyle(.red)
 					} else {
-						Button("Back") {
+						Button{
 							dismiss()
+						} label: {
+							Image(systemName: "chevron.left")
+							Text("Back")
 						}
 					}
 				}
 			}
 			.fullScreenCover(isPresented: $showAboutView) {
-				NavigationStack {
-					TextEditorView(about: $about, currentAbout: viewModel.getCurrentUser().about ,showAboutView: $showAboutView)
-				}
-			}
-		}
-	}
-	
-	struct AboutSection: View {
-		@Binding var about: String
-		@Binding var showAboutView: Bool
-		
-		var body: some View {
-			Section("About") {
-				Button {
-					showAboutView.toggle()
-				} label: {
-					HStack {
-						Text(about.isEmpty ? "Add something about yourself" : about)
-							.foregroundStyle(about.isEmpty ? .gray : .primary)
-						
-						Spacer()
-						Image(systemName: "chevron.right")
-							.foregroundStyle(.gray)
-					}
-				}
-				.foregroundStyle(.primary)
-			}
-		}
-	}
-	
-	struct TextEditorView: View {
-		@Binding var about: String
-		var currentAbout: String
-		@Binding var showAboutView: Bool
-		
-		var body: some View {
-			VStack(alignment: .leading) {
-				TextEditor(text: $about)
-					.padding(4)
-					.frame(maxHeight: UIScreen.main.bounds.height / 5)
-					.background(Color(.tertiarySystemBackground))
-					.cornerRadius(10)
-					.padding(.horizontal, 24)
-				
-				Spacer()
-			}
-			.padding(.top)
-			.background(Color(.secondarySystemBackground))
-			.navigationTitle("About")
-			.navigationBarTitleDisplayMode(.inline)
-			.toolbar {
-				ToolbarItem(placement: .topBarLeading) {
-					Button("Cancel") {
-						about = currentAbout
-						showAboutView = false
-					}
-					.foregroundColor(.red)
-				}
-				ToolbarItem(placement: .topBarTrailing) {
-					Button("Done") {
-						showAboutView = false
-					}
-				}
+				TextEditorView(about: $about, currentAbout: viewModel.getCurrentUser().about ,showAboutView: $showAboutView, action: {})
 			}
 		}
 	}
 }
+
+struct AboutSection: View {
+	@Binding var about: String
+	@Binding var showAboutView: Bool
+	
+	var body: some View {
+		Section("About") {
+			Button {
+				showAboutView.toggle()
+			} label: {
+				HStack {
+					Text(about.isEmpty ? "Add biography" : about)
+						.foregroundStyle(about.isEmpty ? .gray : .primary)
+					
+					Spacer()
+					Image(systemName: "chevron.right")
+						.foregroundStyle(.gray)
+				}
+			}
+			.foregroundStyle(.primary)
+		}
+	}
+}
+
+
 
 #Preview {
 	ProfileEditView(viewModel: ProfileViewModel())

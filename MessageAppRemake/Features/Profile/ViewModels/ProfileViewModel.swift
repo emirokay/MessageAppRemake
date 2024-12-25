@@ -53,12 +53,8 @@ class ProfileViewModel: ObservableObject {
 		
 		performTaskWithLoading {
 			if !imageData.isEmpty {
-				do {
-					let profileUrl = try await self.userService.uploadProfileImage(userId: user.id, imageData: imageData)
-					user.profileImageURL = profileUrl 
-				} catch {
-					throw error
-				}
+				let profileUrl = try await self.userService.uploadProfileImage(userId: user.id, imageData: imageData)
+				user.profileImageURL = profileUrl
 			}
 			try await self.userService.uploadUserData(user: user, userId: user.id)
 		}
