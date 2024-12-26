@@ -25,7 +25,7 @@ final class ChatStore: ObservableObject, ChatStoreProtocol {
 		self.appState = appState
 	}
 
-	private let chatRepository: ChatRepositoryProtocol = ChatRepository()
+	private let chatRepository: ChatRepositoryProtocol = ChatRepository.shared
 	private let appState: AppStateProtocol
 	private var cancellables = Set<AnyCancellable>()
 	private var currentUserId: String?
@@ -50,7 +50,16 @@ final class ChatStore: ObservableObject, ChatStoreProtocol {
 		chatRepository.fetchChats(for: userId)
 			.receive(on: DispatchQueue.main)
 			.sink(receiveCompletion: { _ in }) { [weak self] chats in
-				self?.chats = chats.sorted(by: { $0.lastMessageAt > $1.lastMessageAt })
+				self?.chats = chats.sorted { chat1, chat2 in
+						let isPinned1 = chat1.isPinned.contains(self?.currentUserId ?? "")
+						let isPinned2 = chat2.isPinned.contains(self?.currentUserId ?? "")
+
+						if isPinned1 != isPinned2 {
+							return isPinned1
+						} else {
+							return chat1.lastMessageAt > chat2.lastMessageAt
+						}
+					}
 				self?.fetchUsers(for: chats)
 			}
 			.store(in: &cancellables)

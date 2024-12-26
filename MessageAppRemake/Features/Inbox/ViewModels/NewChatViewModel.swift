@@ -20,7 +20,7 @@ class NewChatViewModel: ObservableObject {
 	private let appState: AppStateProtocol
 	private var cancellables = Set<AnyCancellable>()
 	
-	init(chatRepository: ChatRepositoryProtocol = ChatRepository(),
+	init(chatRepository: ChatRepositoryProtocol = ChatRepository.shared,
 		 userService: UserServiceProtocol = UserService.shared,
 		 chatStore: ChatStoreProtocol = ChatStore.shared,
 		 appState: AppStateProtocol = AppState.shared) {
@@ -77,6 +77,8 @@ class NewChatViewModel: ObservableObject {
 	private func handleNewChat(userIds: [String], chatName: String, imageUrl: String, chatId: String, isGroup: Bool, currentUserId: String) {
 		Task {
 			do {
+				let initialUnreadCount = Dictionary(uniqueKeysWithValues: userIds.map { ($0, 0) })
+				
 				let newChat = Chat(
 					id: chatId,
 					type: isGroup ? .group : .individual,
@@ -85,6 +87,7 @@ class NewChatViewModel: ObservableObject {
 					memberIds: userIds,
 					lastMessage: "",
 					lastMessageBy: "",
+					lastMessageId: "",
 					lastMessageAt: Date(),
 					createdBy: currentUserId,
 					createdAt: Date(),
@@ -93,7 +96,7 @@ class NewChatViewModel: ObservableObject {
 					isPinned: [],
 					isMuted: [],
 					isRead: [],
-					unreadCount: 0,
+					unreadCount: initialUnreadCount,
 					messages: []
 				)
 				

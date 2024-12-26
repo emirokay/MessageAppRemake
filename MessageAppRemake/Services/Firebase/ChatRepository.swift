@@ -18,11 +18,12 @@ protocol ChatRepositoryProtocol {
 	func createChat(chat: Chat) async throws
 	func sendMessage(chatId: String, message: Message) async throws
 	func uploadImage(chatId: String, imageData: Data, isGroup: Bool) async throws -> String
-	func uploadChatData(chat: Chat, userId: String) async throws 
-	func markMessagesAsSeen(chatId: String, messageIds: [String], userId: String) async throws
+	func uploadChatData(chat: Chat) async throws 
+	func markMessagesAsSeen(chat: Chat, messageIds: [String], userId: String) async throws
 }
 
 final class ChatRepository: ChatRepositoryProtocol {
+	static let shared = ChatRepository()
 	private let db = Firestore.firestore()
 	private let storage = Storage.storage()
 	
@@ -106,11 +107,25 @@ final class ChatRepository: ChatRepositoryProtocol {
 		
 		let batch = db.batch()
 		try batch.setData(from: message, forDocument: messageRef)
+		
 		batch.updateData([
 			"lastMessage": lastMessage,
 			"lastMessageBy": message.senderId,
-			"lastMessageAt": Timestamp(date: message.sentAt)
+			"lastMessageId": message.id,
+			"lastMessageAt": Timestamp(date: message.sentAt),
+			"isRead": [message.senderId]
 		], forDocument: chatRef)
+		
+		let chatSnapshot = try await chatRef.getDocument()
+		if let chatData = chatSnapshot.data(),
+		   var unreadCounts = chatData["unreadCount"] as? [String: Int],
+		   let memberIds = chatData["memberIds"] as? [String] {
+			for memberId in memberIds where memberId != message.senderId {
+				unreadCounts[memberId] = (unreadCounts[memberId] ?? 0) + 1
+			}
+			batch.updateData(["unreadCount": unreadCounts], forDocument: chatRef)
+		}
+		
 		try await batch.commit()
 	}
 	
@@ -125,25 +140,34 @@ final class ChatRepository: ChatRepositoryProtocol {
 		return try await storageRef.downloadURL().absoluteString
 	}
 	
-	func uploadChatData(chat: Chat, userId: String) async throws {
+	func uploadChatData(chat: Chat) async throws {
 		do {
 			let encodedChat = try Firestore.Encoder().encode(chat)
 			try await db.collection("chats").document(chat.id).setData(encodedChat)
-			
 		} catch {
 			throw error
 		}
 	}
 	
-	func markMessagesAsSeen(chatId: String, messageIds: [String], userId: String) async throws {
-		let chatRef = db.collection("chats").document(chatId)
+	func markMessagesAsSeen(chat: Chat, messageIds: [String], userId: String) async throws {
+		let chatRef = db.collection("chats").document(chat.id)
 		let batch = db.batch()
+		
+		if messageIds.contains(chat.lastMessageId) {
+			batch.updateData(["isRead": FieldValue.arrayUnion([userId])], forDocument: chatRef)
+		}
 		
 		for messageId in messageIds {
 			let messageRef = chatRef.collection("messages").document(messageId)
 			batch.updateData(["seenBy": FieldValue.arrayUnion([userId])], forDocument: messageRef)
 		}
+		
+		let chatSnapshot = try await chatRef.getDocument()
+		if var unreadCounts = chatSnapshot.data()?["unreadCount"] as? [String: Int] {
+			unreadCounts[userId] = 0 // Reset unread count for the user
+			batch.updateData(["unreadCount": unreadCounts], forDocument: chatRef)
+		}
+		
 		try await batch.commit()
 	}
-	
 }

@@ -16,6 +16,7 @@ struct Chat: Identifiable, Codable, Equatable {
 	var memberIds: [String]
 	var lastMessage: String
 	var lastMessageBy: String
+	var lastMessageId: String
 	var lastMessageAt: Date
 	
 	let createdBy: String
@@ -26,7 +27,7 @@ struct Chat: Identifiable, Codable, Equatable {
 	var isMuted: [String]
 	var isRead: [String]
 	
-	var unreadCount: Int
+	var unreadCount: [String: Int]
 	var messages: [Message]
 	
 	func chatName(for currentUserId: String, users: [User]? = nil) -> String {
@@ -58,7 +59,7 @@ struct Chat: Identifiable, Codable, Equatable {
 		case group
 	}
 	
-	init(id: String, type: ChatType, name: String, imageUrl: String, memberIds: [String], lastMessage: String, lastMessageBy: String, lastMessageAt: Date, createdBy: String, createdAt: Date, bio: String, admins: [String], isPinned: [String], isMuted: [String], isRead: [String], unreadCount: Int, messages: [Message]) {
+	init(id: String, type: ChatType, name: String, imageUrl: String, memberIds: [String], lastMessage: String, lastMessageBy: String, lastMessageId: String, lastMessageAt: Date, createdBy: String, createdAt: Date, bio: String, admins: [String], isPinned: [String], isMuted: [String], isRead: [String], unreadCount: [String: Int], messages: [Message]) {
 		self.id = id
 		self.type = type
 		self.name = name
@@ -66,6 +67,7 @@ struct Chat: Identifiable, Codable, Equatable {
 		self.memberIds = memberIds
 		self.lastMessage = lastMessage
 		self.lastMessageBy = lastMessageBy
+		self.lastMessageId = lastMessageId
 		self.lastMessageAt = lastMessageAt
 		
 		self.createdBy = createdBy
