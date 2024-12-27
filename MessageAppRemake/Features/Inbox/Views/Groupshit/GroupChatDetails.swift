@@ -97,7 +97,7 @@ struct ExitGroupButton: View {
 	
 	var body: some View {
 		Button {
-			viewModel.removeFromGroup(selectedUserId: currentUser)
+			viewModel.exitFromGroup()
 			dismiss()
 			viewModel.exitGroup = true
 			

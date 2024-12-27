@@ -176,6 +176,18 @@ class MessagesViewModel: ObservableObject {
 		}
 	}
 	
+	func exitFromGroup() {
+		guard let currentUserId else { return }
+		var updatedChat = self.chat
+		updatedChat.memberIds.removeAll { $0 == currentUserId }
+		
+		TaskHandler.performTaskWithLoading {
+			try await self.chatRepository.uploadChatData(chat: updatedChat)
+			self.chatStore.refreshChatsAndUsers()
+			DispatchQueue.main.async { self.chat = updatedChat }
+		}
+	}
+	
 	func markMessagesAsSeen() {
 		guard let currentUserId else { return }
 		
