@@ -21,13 +21,13 @@ struct ProfileEditView: View {
 	
 	init(viewModel: ProfileViewModel) {
 		_viewModel = ObservedObject(wrappedValue: viewModel)
-		let currentUser = viewModel.getCurrentUser()
+		let currentUser = viewModel.getCurrentUser
 		_name = State(initialValue: currentUser.name)
 		_about = State(initialValue: currentUser.about)
 	}
 	
 	private func checkForChanges() {
-		let currentUser = viewModel.getCurrentUser()
+		let currentUser = viewModel.getCurrentUser
 		showEdit = name != currentUser.name ||
 		about != currentUser.about ||
 		selectedImage != nil
@@ -38,7 +38,7 @@ struct ProfileEditView: View {
 			List {
 				Section {
 					HStack {
-						CircularProfileImage(image: selectedImage, url: viewModel.getCurrentUser().profileImageURL)
+						CircularProfileImage(image: selectedImage, url: viewModel.getCurrentUser.profileImageURL)
 							.onTapGesture {
 								showImagePicker = true
 							}
@@ -63,7 +63,7 @@ struct ProfileEditView: View {
 						.padding(6)
 				}
 				Section("Email") {
-					Text(viewModel.getCurrentUser().email)
+					Text(viewModel.getCurrentUser.email)
 				}
 				AboutSection(about: $about, showAboutView: $showAboutView)
 			}
@@ -90,8 +90,8 @@ struct ProfileEditView: View {
 				ToolbarItem(placement: .topBarLeading) {
 					if showEdit {
 						Button("Cancel", action: {
-							name = viewModel.getCurrentUser().name
-							about = viewModel.getCurrentUser().about
+							name = viewModel.getCurrentUser.name
+							about = viewModel.getCurrentUser.about
 							imagePicker.clearSelections()
 							showEdit = false
 						})
@@ -107,7 +107,7 @@ struct ProfileEditView: View {
 				}
 			}
 			.fullScreenCover(isPresented: $showAboutView) {
-				TextEditorView(about: $about, currentAbout: viewModel.getCurrentUser().about ,showAboutView: $showAboutView, action: {})
+				TextEditorView(about: $about, currentAbout: viewModel.getCurrentUser.about ,showAboutView: $showAboutView, action: {})
 			}
 		}
 	}

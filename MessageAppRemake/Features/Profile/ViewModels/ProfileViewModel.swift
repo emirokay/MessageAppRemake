@@ -15,7 +15,18 @@ class ProfileViewModel: ObservableObject {
 	private let appState: AppStateProtocol
 	let settingsOptions = SettingsOption.allCases
 	
-	init(userService: UserServiceProtocol = UserService.shared, appState: AppStateProtocol = AppState.shared) {
+	var getCurrentUser: User {
+		return currentUser ?? User(
+			id: "0",
+			name: "Unknown",
+			email: "Unknown",
+			profileImageURL: "",
+			about: "Unknown"
+		)
+	}
+	
+	init(userService: UserServiceProtocol = UserService.shared,
+		appState: AppStateProtocol = AppState.shared) {
 		self.userService = userService
 		self.appState = appState
 		setupSubscribers()
@@ -28,20 +39,13 @@ class ProfileViewModel: ObservableObject {
 	}
 	
 	func signOut(authService: AuthServiceProtocol = AuthService.shared) {
-		performTaskWithLoading {
+		TaskHandler.performTaskWithLoading {
 			try await authService.signOut()
 		}
 	}
-	//IDK WTF IS THIS
-	func getCurrentUser() -> User {
-		if let user = currentUser {
-			return user
-		}
-		return  User(id: "0", name: "Unknown", email: "Unknown", profileImageURL: "", about: "Unknown")
-	}
 	
 	func deleteAccount(authService: AuthServiceProtocol = AuthService.shared) {
-		performTaskWithLoading {
+		TaskHandler.performTaskWithLoading {
 			try await authService.deleteAccount()
 		}
 	}
@@ -51,7 +55,7 @@ class ProfileViewModel: ObservableObject {
 		user.name = name
 		user.about = about
 		
-		performTaskWithLoading {
+		TaskHandler.performTaskWithLoading {
 			if !imageData.isEmpty {
 				let profileUrl = try await self.userService.uploadProfileImage(userId: user.id, imageData: imageData)
 				user.profileImageURL = profileUrl
@@ -59,20 +63,7 @@ class ProfileViewModel: ObservableObject {
 			try await self.userService.uploadUserData(user: user, userId: user.id)
 		}
 	}
-	
-	private func performTaskWithLoading(_ task: @escaping () async throws -> Void) {
-		appState.setLoading(true)
-		Task {
-			do {
-				try await task()
-			} catch {
-				appState.setError("Operation Failed", error.localizedDescription)
-			}
-			appState.setLoading(false)
-		}
-	}
 }
-
 
 enum SettingsOption: CaseIterable, Identifiable {
 	case starredMessages

@@ -7,18 +7,18 @@
 
 import Foundation
 
+import Foundation
+
 struct Chat: Identifiable, Codable, Equatable {
 	let id: String
 	let type: ChatType
 	var name: String
 	var imageUrl: String
-	
 	var memberIds: [String]
 	var lastMessage: String
 	var lastMessageBy: String
 	var lastMessageId: String
 	var lastMessageAt: Date
-	
 	let createdBy: String
 	let createdAt: Date
 	var bio: String
@@ -26,7 +26,6 @@ struct Chat: Identifiable, Codable, Equatable {
 	var isPinned: [String]
 	var isMuted: [String]
 	var isRead: [String]
-	
 	var unreadCount: [String: Int]
 	var messages: [Message]
 	
@@ -57,28 +56,5 @@ struct Chat: Identifiable, Codable, Equatable {
 	enum ChatType: String, Codable {
 		case individual
 		case group
-	}
-	
-	init(id: String, type: ChatType, name: String, imageUrl: String, memberIds: [String], lastMessage: String, lastMessageBy: String, lastMessageId: String, lastMessageAt: Date, createdBy: String, createdAt: Date, bio: String, admins: [String], isPinned: [String], isMuted: [String], isRead: [String], unreadCount: [String: Int], messages: [Message]) {
-		self.id = id
-		self.type = type
-		self.name = name
-		self.imageUrl = imageUrl
-		self.memberIds = memberIds
-		self.lastMessage = lastMessage
-		self.lastMessageBy = lastMessageBy
-		self.lastMessageId = lastMessageId
-		self.lastMessageAt = lastMessageAt
-		
-		self.createdBy = createdBy
-		self.createdAt = createdAt
-		self.bio = bio
-		self.admins = admins
-		self.isPinned = isPinned
-		self.isMuted = isMuted
-		self.isRead = isRead
-		
-		self.unreadCount = unreadCount
-		self.messages = messages
 	}
 }

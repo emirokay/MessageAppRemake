@@ -8,8 +8,6 @@
 import Foundation
 import Firebase
 import FirebaseAuth
-import FirebaseFirestore
-import FirebaseStorage
 import Combine
 
 protocol AuthServiceProtocol {
@@ -35,57 +33,38 @@ final class AuthService: AuthServiceProtocol {
 	
 	@MainActor
 	func login(withEmail email: String, password: String) async throws {
-		do {
-			let result = try await Auth.auth().signIn(withEmail: email, password: password)
-			self.userSession = result.user
-			try await userService.fetchCurrentUser()
-		} catch {
-			throw error
-		}
+		let result = try await Auth.auth().signIn(withEmail: email, password: password)
+		self.userSession = result.user
+		try await userService.fetchCurrentUser()
 	}
 	
 	@MainActor
 	func signOut() async throws {
-		do {
-			try Auth.auth().signOut()
-			self.userSession = nil
-		} catch {
-			throw error
-		}
+		try Auth.auth().signOut()
+		self.userSession = nil
 	}
 	
 	@MainActor
 	func createUser(withEmail email: String, password: String, fullname: String) async throws {
-		do {
-			let result = try await Auth.auth().createUser(withEmail: email, password: password)
-			self.userSession = result.user
-			
-			let user = User(
-				id: result.user.uid,
-				name: fullname,
-				email: email,
-				profileImageURL: "",
-				about: ""
-			)
-			try await userService.uploadUserData(user: user, userId: result.user.uid)
-			try await userService.fetchCurrentUser()
-			
-		} catch {
-			throw error
-		}
+		let result = try await Auth.auth().createUser(withEmail: email, password: password)
+		self.userSession = result.user
+		
+		let user = User(
+			id: result.user.uid,
+			name: fullname,
+			email: email,
+			profileImageURL: "",
+			about: ""
+		)
+		try await userService.uploadUserData(user: user, userId: result.user.uid)
+		try await userService.fetchCurrentUser()
 	}
 	
 	@MainActor
 	func deleteAccount() async throws {
-		guard let uid = Auth.auth().currentUser?.uid else {
-			return
-		}
-		do {
-			try await userService.deleteUserData(userId: uid)
-			try await Auth.auth().currentUser?.delete()
-			self.userSession = nil
-		} catch {
-			throw error
-		}
+		guard let currentUser = Auth.auth().currentUser else { return }
+		try await userService.deleteUserData(userId: currentUser.uid)
+		try await currentUser.delete()
+		self.userSession = nil
 	}
 }

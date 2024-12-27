@@ -59,7 +59,7 @@ struct GroupChatDetailsView: View {
 			.onChange(of: viewModel.chat) { refreshData() }
 			.fullScreenCover(isPresented: $showAboutView) {
 				TextEditorView(about: $about, currentAbout: viewModel.chat.bio, showAboutView: $showAboutView, action: {
-					viewModel.saveGroupInfo(chat: viewModel.chat, chatName: chatName, about: about, imageData: nil)
+					viewModel.saveGroupInfo(chatName: chatName, about: about, imageData: nil)
 					refreshData()
 				})
 			}
@@ -97,7 +97,7 @@ struct ExitGroupButton: View {
 	
 	var body: some View {
 		Button {
-			viewModel.removeFromGroup(chat: chat, selectedUserId: currentUser)
+			viewModel.removeFromGroup(selectedUserId: currentUser)
 			dismiss()
 			viewModel.exitGroup = true
 			

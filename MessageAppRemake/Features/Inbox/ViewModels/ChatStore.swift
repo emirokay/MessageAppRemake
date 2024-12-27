@@ -20,13 +20,8 @@ protocol ChatStoreProtocol {
 
 final class ChatStore: ObservableObject, ChatStoreProtocol {
 	static let shared = ChatStore()
-	
-	private init(appState: AppStateProtocol = AppState.shared) {
-		self.appState = appState
-	}
 
 	private let chatRepository: ChatRepositoryProtocol = ChatRepository.shared
-	private let appState: AppStateProtocol
 	private var cancellables = Set<AnyCancellable>()
 	private var currentUserId: String?
 
@@ -50,16 +45,11 @@ final class ChatStore: ObservableObject, ChatStoreProtocol {
 		chatRepository.fetchChats(for: userId)
 			.receive(on: DispatchQueue.main)
 			.sink(receiveCompletion: { _ in }) { [weak self] chats in
-				self?.chats = chats.sorted { chat1, chat2 in
-						let isPinned1 = chat1.isPinned.contains(self?.currentUserId ?? "")
-						let isPinned2 = chat2.isPinned.contains(self?.currentUserId ?? "")
-
-						if isPinned1 != isPinned2 {
-							return isPinned1
-						} else {
-							return chat1.lastMessageAt > chat2.lastMessageAt
-						}
-					}
+				self?.chats = chats.sorted {
+					let isPinned1 = $0.isPinned.contains(self?.currentUserId ?? "")
+					let isPinned2 = $1.isPinned.contains(self?.currentUserId ?? "")
+					return isPinned1 != isPinned2 ? isPinned1 : $0.lastMessageAt > $1.lastMessageAt
+				}
 				self?.fetchUsers(for: chats)
 			}
 			.store(in: &cancellables)
@@ -80,15 +70,11 @@ final class ChatStore: ObservableObject, ChatStoreProtocol {
 	func fetchAllUsers() {
 		guard let userId = currentUserId else { return }
 		
-		appState.setLoading(true)
-		Task {
-			do {
-				let allUsers = try await chatRepository.fetchAllUsers()
+		TaskHandler.performTaskWithLoading {
+			let allUsers = try await self.chatRepository.fetchAllUsers()
+			await MainActor.run {
 				self.allUsers = allUsers.filter { $0.id != userId }
-			} catch {
-				self.appState.setError("Error Fetching Users", error.localizedDescription)
 			}
-			self.appState.setLoading(false)
 		}
 	}
 	

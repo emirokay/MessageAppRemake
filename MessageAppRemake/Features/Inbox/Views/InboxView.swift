@@ -66,7 +66,7 @@ struct InboxView: View {
 	
 	private func pinButton(for chat: Chat) -> some View {
 		Button {
-			viewModel.pinChat(chat: chat)
+			viewModel.togglePin(chat: chat)
 		} label: {
 			Label(chat.isPinned.contains(viewModel.currentUserId ?? "") ? "Unpin chat" : "Pin chat", systemImage: chat.isPinned.contains(viewModel.currentUserId ?? "") ? "pin.slash.fill" : "pin.fill")
 		}
@@ -75,7 +75,7 @@ struct InboxView: View {
 	
 	private func muteButton(for chat: Chat) -> some View {
 		Button {
-			viewModel.muteChat(chat: chat)
+			viewModel.toggleMute(chat: chat)
 		} label: {
 			Label(chat.isMuted.contains(viewModel.currentUserId ?? "") ? "Unmute" : "Mute", systemImage: chat.isMuted.contains(viewModel.currentUserId ?? "") ? "bell.fill" : "bell.slash.fill")
 		}
