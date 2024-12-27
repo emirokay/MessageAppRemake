@@ -11,7 +11,7 @@ import FirebaseFirestore
 class MessagesViewModel: ObservableObject {
 	@Published var chat: Chat {
 		didSet {
-			recalculateFilteredChatUsers()
+			updateFilteredChatUsers()
 		}
 	}
 	@Published var messages: [Message] = []
@@ -23,32 +23,29 @@ class MessagesViewModel: ObservableObject {
 	@Published var exitGroup: Bool = false
 	@Published var navigateToUserProfile: User?
 	@Published var isNavigating: Bool = false
+	@Published var filteredChatUsers: [User] = []
 	
 	private let chatRepository: ChatRepositoryProtocol
 	private let chatStore: ChatStoreProtocol
 	private var cancellables = Set<AnyCancellable>()
-	private let appState: AppStateProtocol
 	
-	var filteredChatUsers: [User] = []
-
-	func recalculateFilteredChatUsers() {
-		filteredChatUsers = users.filter { user in
-			chat.memberIds.contains(user.id)
-		}
+	private var isReadyToMarkMessages: AnyPublisher<Bool, Never> {
+		Publishers.CombineLatest($currentUserId, $messages)
+			.map { $0 != nil && !$1.isEmpty }
+			.removeDuplicates()
+			.eraseToAnyPublisher()
 	}
 	
 	init(chat: Chat,
-		 chatRepository: ChatRepositoryProtocol = ChatRepository(),
+		 chatRepository: ChatRepositoryProtocol = ChatRepository.shared,
 		 chatStore: ChatStoreProtocol = ChatStore.shared,
-		 userService: UserServiceProtocol = UserService.shared,
-		 appState: AppStateProtocol = AppState.shared) {
+		 userService: UserServiceProtocol = UserService.shared) {
 		self.chat = chat
 		self.chatRepository = chatRepository
 		self.chatStore = chatStore
-		self.appState = appState
 		setupSubscribers(userService: userService)
 		fetchMessages()
-		recalculateFilteredChatUsers() 
+		updateFilteredChatUsers()
 	}
 	
 	private func setupSubscribers(userService: UserServiceProtocol) {
@@ -59,28 +56,38 @@ class MessagesViewModel: ObservableObject {
 		userService.currentUserPublisher
 			.compactMap { $0?.id }
 			.receive(on: DispatchQueue.main)
-			.sink { [weak self] userId in
-				self?.currentUserId = userId
-			}
-			.store(in: &cancellables)
+			.assign(to: &$currentUserId)
 		
 		chatStore.usersPublisher
 			.assign(to: &$users)
 		
 		chatStore.allUsersPublisher
 			.assign(to: &$allUsers)
+		
+		isReadyToMarkMessages
+				.filter { $0 }
+				.sink { [weak self] _ in
+					self?.markMessagesAsSeen()
+				}
+				.store(in: &cancellables)
+	}
+	
+	func updateFilteredChatUsers() {
+		filteredChatUsers = users.filter { chat.memberIds.contains($0.id) }
 	}
 	
 	func fetchAllUsers() {
-		chatStore.fetchAllUsers()
+		TaskHandler.performTaskWithLoading {
+			self.chatStore.fetchAllUsers()
+		}
 	}
 	
 	func fetchMessages() {
 		chatRepository.fetchMessages(chatId: chat.id)
 			.receive(on: DispatchQueue.main)
 			.sink(receiveCompletion: { completion in
-				if case let .failure(error) = completion {
-					self.appState.setError("Error fetching messages", error.localizedDescription)
+				if case .failure(_) = completion {
+					//self?.appState.setError("Error fetching messages", error.localizedDescription)
 				}
 			}, receiveValue: { [weak self] messages in
 				self?.messages = messages
@@ -90,132 +97,96 @@ class MessagesViewModel: ObservableObject {
 	
 	func sendMessage(messageText: String, imageData: Data?) {
 		isSending = true
-		
-		performTaskWithLoading{
+		TaskHandler.performTaskWithLoading {
 			if let imageData = imageData {
 				let imageUrl = try await self.chatRepository.uploadImage(chatId: self.chat.id, imageData: imageData, isGroup: false)
-				self.sendMessageWithUrl(messageText: messageText, imageUrl: imageUrl)
+				self.createMessage(text: messageText, imageUrl: imageUrl)
 			} else {
-				self.sendMessageWithUrl(messageText: messageText, imageUrl: "")
+				self.createMessage(text: messageText, imageUrl: "")
 			}
 		}
+		isSending = false
 	}
 	
-	private func sendMessageWithUrl(messageText: String, imageUrl: String) {
+	private func createMessage(text: String, imageUrl: String) {
 		guard let currentUserId else { return }
 		
 		let newMessage = Message(
 			id: UUID().uuidString,
 			chatId: chat.id,
 			senderId: currentUserId,
-			text: messageText,
+			text: text,
 			imageUrl: imageUrl,
 			sentAt: Date(),
-			seenBy: []
-		) 
+			seenBy: [currentUserId]
+		)
 		
-		performTaskWithLoading {
+		TaskHandler.performTask {
 			try await self.chatRepository.sendMessage(chatId: self.chat.id, message: newMessage)
 		}
-		
-		self.isSending = false
 	}
 	
-	func saveGroupInfo(chat: Chat, chatName: String, about: String, imageData: Data?){
-		guard let currentUserId = currentUserId else { return }
-		var chat = chat
-		if !chatName.isEmpty {
-			chat.name = chatName
-		}
-		if !about.isEmpty {
-			chat.bio = about
-		}
-		performTaskWithLoading {
+	func saveGroupInfo(chatName: String, about: String, imageData: Data?){
+		var updatedChat = self.chat
+		if !chatName.isEmpty { updatedChat.name = chatName }
+		if !about.isEmpty { updatedChat.bio = about }
+		
+		TaskHandler.performTaskWithLoading {
 			if let imageData {
-				let profileImageUrl = try await self.chatRepository.uploadImage(chatId: chat.id, imageData: imageData, isGroup: true)
-				chat.imageUrl = profileImageUrl
+				let profileImageUrl = try await self.chatRepository.uploadImage(chatId: updatedChat.id, imageData: imageData, isGroup: true)
+				updatedChat.imageUrl = profileImageUrl
 			}
-			try await self.chatRepository.uploadChatData(chat: chat, userId: currentUserId)
-			DispatchQueue.main.async {
-				self.chat = chat
-			}
+			try await self.chatRepository.uploadChatData(chat: updatedChat)
+			DispatchQueue.main.async { self.chat = updatedChat }
 		}
 	}
 	
-	func addGroupMembers(chat: Chat, users: [User]) {
-		guard let currentUserId = currentUserId else { return }
-		var chat = chat
-		
+	func addGroupMembers(users: [User]) {
+		var updatedChat = self.chat
 		let userIds = users.map { $0.id }
-		chat.memberIds.append(contentsOf: userIds)
+		updatedChat.memberIds.append(contentsOf: userIds)
 		
-		performTaskWithLoading {
-			try await self.chatRepository.uploadChatData(chat: chat, userId: currentUserId)
-			DispatchQueue.main.async {
-				self.chat = chat
-			}
+		TaskHandler.performTaskWithLoading {
+			try await self.chatRepository.uploadChatData(chat: updatedChat)
+			DispatchQueue.main.async { self.chat = updatedChat }
 		}
 	}
 	
-	private func performTaskWithLoading(_ task: @escaping () async throws -> Void) {
-		appState.setLoading(true)
-		Task {
-			do {
-				try await task()
-			} catch {
-				appState.setError("Operation Failed", error.localizedDescription)
-			}
-			appState.setLoading(false)
-		}
-	}
-	
-	func handleAdmin(chat: Chat, selectedUserId: String) {
-		guard let currentUserId = currentUserId else { return }
-		var chat = chat
-		
-		if chat.admins.contains(selectedUserId) {
-			chat.admins.removeAll(where: { $0 == selectedUserId })
+	func toggleAdmin(selectedUserId: String) {
+		var updatedChat = self.chat
+		if updatedChat.admins.contains(selectedUserId) {
+			updatedChat.admins.removeAll { $0 == selectedUserId }
 		} else {
-			chat.admins.append(selectedUserId)
+			updatedChat.admins.append(selectedUserId)
 		}
 		
-		performTaskWithLoading {
-			try await self.chatRepository.uploadChatData(chat: chat, userId: currentUserId)
-			DispatchQueue.main.async {
-				self.chat = chat
-			}
+		TaskHandler.performTask {
+			try await self.chatRepository.uploadChatData(chat: updatedChat)
+			DispatchQueue.main.async { self.chat = updatedChat }
 		}
 	}
 	
-	func removeFromGroup(chat: Chat, selectedUserId: String) {
-		guard let currentUserId = currentUserId else { return }
-		var chat = chat
-		chat.memberIds.removeAll(where: { $0 == selectedUserId })
+	func removeFromGroup(selectedUserId: String) {
+		var updatedChat = self.chat
+		updatedChat.memberIds.removeAll { $0 == selectedUserId }
 		
-		performTaskWithLoading {
-			try await self.chatRepository.uploadChatData(chat: chat, userId: currentUserId)
-			DispatchQueue.main.async {
-				self.chat = chat
-			}
+		TaskHandler.performTaskWithLoading {
+			try await self.chatRepository.uploadChatData(chat: updatedChat)
+			DispatchQueue.main.async { self.chat = updatedChat }
 		}
 	}
 	
-	//DOESNT WORK
 	func markMessagesAsSeen() {
 		guard let currentUserId else { return }
-		Task {
-			let unseenMessageIds = messages
+		
+		TaskHandler.performTask {
+			let unseenMessageIds = self.messages
 				.filter { !$0.seenBy.contains(currentUserId) }
 				.map { $0.id }
 			
 			guard !unseenMessageIds.isEmpty else { return }
 			
-			do {
-				try await chatRepository.markMessagesAsSeen(chatId: chat.id, messageIds: unseenMessageIds, userId: currentUserId)
-			} catch {
-				self.appState.setError("Error marking messages as seen", error.localizedDescription)
-			}
+			try await self.chatRepository.markMessagesAsSeen(chat: self.chat, messageIds: unseenMessageIds, userId: currentUserId)
 		}
 	}
-	
 }

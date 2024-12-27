@@ -18,11 +18,7 @@ struct ContentView: View {
 				LoginView(viewModel: viewModel)
 			}
 		}
-		.overlay {
-			if viewModel.isLoading {
-				LoadingView(show: viewModel.isLoading)
-			}
-		}
+		.overlay(loadingOverlay)
 		.alert(item: $viewModel.appError) { appError in
 			Alert(
 				title: Text(appError.title),
@@ -31,6 +27,14 @@ struct ContentView: View {
 					viewModel.clearError()
 				}
 			)
+		}
+	}
+	
+	private var loadingOverlay: some View {
+		Group {
+			if viewModel.isLoading {
+				LoadingView(show: true)
+			}
 		}
 	}
 }

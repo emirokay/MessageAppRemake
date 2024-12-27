@@ -18,11 +18,12 @@ protocol ChatRepositoryProtocol {
 	func createChat(chat: Chat) async throws
 	func sendMessage(chatId: String, message: Message) async throws
 	func uploadImage(chatId: String, imageData: Data, isGroup: Bool) async throws -> String
-	func uploadChatData(chat: Chat, userId: String) async throws 
-	func markMessagesAsSeen(chatId: String, messageIds: [String], userId: String) async throws
+	func uploadChatData(chat: Chat) async throws 
+	func markMessagesAsSeen(chat: Chat, messageIds: [String], userId: String) async throws
 }
 
 final class ChatRepository: ChatRepositoryProtocol {
+	static let shared = ChatRepository()
 	private let db = Firestore.firestore()
 	private let storage = Storage.storage()
 	
@@ -38,43 +39,6 @@ final class ChatRepository: ChatRepositoryProtocol {
 					subject.send(chats)
 				}
 			}
-		return subject.eraseToAnyPublisher()
-	}
-	
-	func createChat(chat: Chat) async throws {
-		let chatRef = db.collection("chats").document(chat.id)
-		try chatRef.setData(from: chat)
-	}
-	
-	func fetchAllUsers() async throws -> [User] {
-		let snapshot = try await db.collection("users").getDocuments()
-		return snapshot.documents.compactMap { try? $0.data(as: User.self) }
-	}
-	
-	func fetchUsersInChats(for userIds: [String]) -> AnyPublisher<[User], Error> {
-		let subject = PassthroughSubject<[User], Error>()
-		
-		guard !userIds.isEmpty else {
-			subject.send([])
-			subject.send(completion: .finished)
-			return subject.eraseToAnyPublisher()
-		}
-		
-		db.collection("users")
-			.whereField("id", in: userIds)
-			.addSnapshotListener { snapshot, error in
-				if let error = error {
-					subject.send(completion: .failure(error))
-				} else if let documents = snapshot?.documents {
-					do {
-						let users = try documents.map { try $0.data(as: User.self) }
-						subject.send(users)
-					} catch {
-						subject.send(completion: .failure(error))
-					}
-				}
-			}
-		
 		return subject.eraseToAnyPublisher()
 	}
 	
@@ -95,22 +59,66 @@ final class ChatRepository: ChatRepositoryProtocol {
 		return subject.eraseToAnyPublisher()
 	}
 	
-	func sendMessage(chatId: String, message: Message) async throws {
-		var lastMessage = message.text
-		if message.text.isEmpty && !message.imageUrl.isEmpty {
-			lastMessage = "Photo"
+	func fetchUsersInChats(for userIds: [String]) -> AnyPublisher<[User], Error> {
+		let subject = PassthroughSubject<[User], Error>()
+		
+		guard !userIds.isEmpty else {
+			subject.send([])
+			subject.send(completion: .finished)
+			return subject.eraseToAnyPublisher()
 		}
 		
+		db.collection("users")
+			.whereField("id", in: userIds)
+			.addSnapshotListener { snapshot, error in
+				if let error = error {
+					subject.send(completion: .failure(error))
+				} else {
+					//MAP -> COMPACTMAP
+					let users = snapshot?.documents.compactMap { try? $0.data(as: User.self) } ?? []
+					subject.send(users)
+				}
+			}
+		
+		return subject.eraseToAnyPublisher()
+	}
+	
+	func fetchAllUsers() async throws -> [User] {
+		let snapshot = try await db.collection("users").getDocuments()
+		return snapshot.documents.compactMap { try? $0.data(as: User.self) }
+	}
+	
+	func createChat(chat: Chat) async throws {
+		try db.collection("chats").document(chat.id).setData(from: chat)
+	}
+	
+	func sendMessage(chatId: String, message: Message) async throws {
 		let chatRef = db.collection("chats").document(chatId)
 		let messageRef = chatRef.collection("messages").document(message.id)
 		
+		let lastMessage = (message.text.isEmpty && !message.imageUrl.isEmpty) ? "Photo" : message.text
+		
 		let batch = db.batch()
 		try batch.setData(from: message, forDocument: messageRef)
+		
 		batch.updateData([
 			"lastMessage": lastMessage,
 			"lastMessageBy": message.senderId,
-			"lastMessageAt": Timestamp(date: message.sentAt)
+			"lastMessageId": message.id,
+			"lastMessageAt": Timestamp(date: message.sentAt),
+			"isRead": [message.senderId]
 		], forDocument: chatRef)
+		
+		let chatSnapshot = try await chatRef.getDocument()
+		if let chatData = chatSnapshot.data(),
+		   var unreadCounts = chatData["unreadCount"] as? [String: Int],
+		   let memberIds = chatData["memberIds"] as? [String] {
+			for memberId in memberIds where memberId != message.senderId {
+				unreadCounts[memberId] = (unreadCounts[memberId] ?? 0) + 1
+			}
+			batch.updateData(["unreadCount": unreadCounts], forDocument: chatRef)
+		}
+		
 		try await batch.commit()
 	}
 	
@@ -121,29 +129,31 @@ final class ChatRepository: ChatRepositoryProtocol {
 		let storageRef =  storage.reference().child(path)
 		
 		let _ = try await storageRef.putDataAsync(imageData)
-		
 		return try await storageRef.downloadURL().absoluteString
 	}
 	
-	func uploadChatData(chat: Chat, userId: String) async throws {
-		do {
-			let encodedChat = try Firestore.Encoder().encode(chat)
-			try await db.collection("chats").document(chat.id).setData(encodedChat)
-			
-		} catch {
-			throw error
-		}
+	func uploadChatData(chat: Chat) async throws {
+		let encodedChat = try Firestore.Encoder().encode(chat)
+		try await db.collection("chats").document(chat.id).setData(encodedChat)
 	}
 	
-	func markMessagesAsSeen(chatId: String, messageIds: [String], userId: String) async throws {
-		let chatRef = db.collection("chats").document(chatId)
+	func markMessagesAsSeen(chat: Chat, messageIds: [String], userId: String) async throws {
+		let chatRef = db.collection("chats").document(chat.id)
 		let batch = db.batch()
+		
+		if messageIds.contains(chat.lastMessageId) {
+			batch.updateData(["isRead": FieldValue.arrayUnion([userId])], forDocument: chatRef)
+		}
 		
 		for messageId in messageIds {
 			let messageRef = chatRef.collection("messages").document(messageId)
 			batch.updateData(["seenBy": FieldValue.arrayUnion([userId])], forDocument: messageRef)
 		}
+		
+		if let unreadCounts = try await chatRef.getDocument().data()?["unreadCount"] as? [String: Int] {
+			batch.updateData(["unreadCount": unreadCounts.merging([userId: 0], uniquingKeysWith: { _, new in new })], forDocument: chatRef)
+		}
+		
 		try await batch.commit()
 	}
-	
 }

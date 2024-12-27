@@ -65,7 +65,7 @@ struct EditGroup: View {
 			.toolbar {
 				ToolbarItem(placement: .topBarTrailing) {
 					Button("Save") {
-						viewModel.saveGroupInfo(chat: chat, chatName: chatName, about: "", imageData: imagePicker.imageData)
+						viewModel.saveGroupInfo(chatName: chatName, about: "", imageData: imagePicker.imageData)
 						dismiss()
 					}
 				}

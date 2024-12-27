@@ -40,6 +40,7 @@
 		5F63EDAF2CF2B06400DBCABD /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5F63EDA72CF2B06400DBCABD /* Preview Assets.xcassets */; };
 		5F63EDB02CF2B06400DBCABD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5F63EDA92CF2B06400DBCABD /* Assets.xcassets */; };
 		5F7A6BE02CFF8A2200A2CF1D /* ProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F7A6BDF2CFF8A2200A2CF1D /* ProfileEditView.swift */; };
+		5F940AAD2D1E3738006E375C /* TaskHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F940AAC2D1E3732006E375C /* TaskHandler.swift */; };
 		5FB0B0DB2CF3E6A000111712 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 5FB0B0DA2CF3E6A000111712 /* FirebaseAnalytics */; };
 		5FB0B0DD2CF3E6A000111712 /* FirebaseAnalyticsOnDeviceConversion in Frameworks */ = {isa = PBXBuildFile; productRef = 5FB0B0DC2CF3E6A000111712 /* FirebaseAnalyticsOnDeviceConversion */; };
 		5FB0B0DF2CF3E6A000111712 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 5FB0B0DE2CF3E6A000111712 /* FirebaseAnalyticsWithoutAdIdSupport */; };
@@ -111,6 +112,7 @@
 		5F63EDA92CF2B06400DBCABD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5F63EDAB2CF2B06400DBCABD /* MessageAppRemakeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageAppRemakeApp.swift; sourceTree = "<group>"; };
 		5F7A6BDF2CFF8A2200A2CF1D /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditView.swift; sourceTree = "<group>"; };
+		5F940AAC2D1E3732006E375C /* TaskHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskHandler.swift; sourceTree = "<group>"; };
 		5FB6A4492CF63C60000AB790 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		5FB8F33B2D12359D00C82D91 /* UserDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDetailsView.swift; sourceTree = "<group>"; };
 		5FD2FEEA2CFE606C0007DF52 /* MessagesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesViewModel.swift; sourceTree = "<group>"; };
@@ -324,6 +326,7 @@
 		5F5B0B392CFD319400BBDAFA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				5F940AAC2D1E3732006E375C /* TaskHandler.swift */,
 				5F5B0B352CFD319400BBDAFA /* HeaderView.swift */,
 				5F5B0B362CFD319400BBDAFA /* InputFieldView.swift */,
 				5F5B0B372CFD319400BBDAFA /* LoadingView.swift */,
@@ -501,6 +504,7 @@
 				5F5B0B082CFD316500BBDAFA /* MessagesView.swift in Sources */,
 				5F5B0B092CFD316500BBDAFA /* NewChatView.swift in Sources */,
 				5F5B0B0A2CFD316500BBDAFA /* NewGroupChatView.swift in Sources */,
+				5F940AAD2D1E3738006E375C /* TaskHandler.swift in Sources */,
 				5FE812FB2D19E9C000470823 /* GroupHeader.swift in Sources */,
 				5F5B0B2A2CFD318200BBDAFA /* AppError.swift in Sources */,
 				5F5B0B2B2CFD318200BBDAFA /* Chat.swift in Sources */,

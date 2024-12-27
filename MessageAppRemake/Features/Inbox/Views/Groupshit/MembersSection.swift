@@ -154,14 +154,14 @@ struct MemberRowDetails: View {
 				if !isCurrentUser {
 					if isCurrentUserAdmin {
 						ActionButton(title: isAdmin ? "Dismiss Admin" : "Make Admin", foregroundColor: isAdmin ? .red : .blue) {
-							viewModel.handleAdmin(chat: viewModel.chat, selectedUserId: user.id)
+							viewModel.toggleAdmin(selectedUserId: user.id)
 							dismiss()
 						}
 					}
 					
 					if isCurrentUserAdmin {
 						ActionButton(title: "Remove from group", foregroundColor: .red) {
-							viewModel.removeFromGroup(chat: viewModel.chat, selectedUserId: user.id)
+							viewModel.removeFromGroup(selectedUserId: user.id)
 							dismiss()
 						}
 					}
@@ -253,7 +253,7 @@ struct AddMembers: View {
 				
 				ToolbarItem(placement: .topBarTrailing) {
 					Button("Add") {
-						viewModel.addGroupMembers(chat: chat, users: preSelectedUsers)
+						viewModel.addGroupMembers(users: preSelectedUsers)
 						dismiss()
 					}
 				}

@@ -8,15 +8,18 @@
 import SwiftUI
 
 struct MainTabView: View {
-	@StateObject var inboxViewModel = InboxViewModel()
-	@StateObject var profileViewModel = ProfileViewModel()
+	@StateObject private var inboxViewModel = InboxViewModel()
+	@StateObject private var profileViewModel = ProfileViewModel()
 	
 	var body: some View {
-		MainTabView2(inboxViewModel: inboxViewModel, profileViewModel: profileViewModel)
+		MainTabViewContent(
+			inboxViewModel: inboxViewModel,
+			profileViewModel: profileViewModel
+		)
 	}
 }
 
-struct MainTabView2: View {
+private struct MainTabViewContent: View {
 	@ObservedObject var inboxViewModel: InboxViewModel
 	@ObservedObject var profileViewModel: ProfileViewModel
 	

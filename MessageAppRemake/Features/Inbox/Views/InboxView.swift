@@ -51,7 +51,7 @@ struct InboxView: View {
 						}
 				}
 			}
-		}
+		}.animation(.easeInOut, value: viewModel.chats)
 	}
 	
 	private var newChatButton: some View {
@@ -66,18 +66,18 @@ struct InboxView: View {
 	
 	private func pinButton(for chat: Chat) -> some View {
 		Button {
-			
+			viewModel.togglePin(chat: chat)
 		} label: {
-			Label("Pin chat", systemImage: chat.isPinned.contains(viewModel.currentUserId ?? "") ? "pin.slash.fill" : "pin.fill")
+			Label(chat.isPinned.contains(viewModel.currentUserId ?? "") ? "Unpin chat" : "Pin chat", systemImage: chat.isPinned.contains(viewModel.currentUserId ?? "") ? "pin.slash.fill" : "pin.fill")
 		}
 		.tint(.gray)
 	}
 	
 	private func muteButton(for chat: Chat) -> some View {
 		Button {
-			
+			viewModel.toggleMute(chat: chat)
 		} label: {
-			Label("Mute", systemImage: chat.isMuted.contains(viewModel.currentUserId ?? "") ? "bell.fill" : "bell.slash.fill")
+			Label(chat.isMuted.contains(viewModel.currentUserId ?? "") ? "Unmute" : "Mute", systemImage: chat.isMuted.contains(viewModel.currentUserId ?? "") ? "bell.fill" : "bell.slash.fill")
 		}
 		.tint(.orange)
 	}

@@ -11,7 +11,7 @@ import SwiftUI
 @MainActor
 class ImagePicker: ObservableObject {
 	@Published var image: Image?
-	@Published var imageData: Data?  //= Data()
+	@Published var imageData: Data? 
 	
 	@Published var imageSelection : PhotosPickerItem? {
 		didSet {
