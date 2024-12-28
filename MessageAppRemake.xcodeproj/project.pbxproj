@@ -176,7 +176,7 @@
 		5F5B0AFA2CFD316500BBDAFA /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				5FE812F42D19E81200470823 /* Groupshit */,
+				5FE812F42D19E81200470823 /* GroupDetails */,
 				5FB8F33B2D12359D00C82D91 /* UserDetailsView.swift */,
 				5F5B0AF52CFD316500BBDAFA /* InboxChatRowView.swift */,
 				5F5B0AF62CFD316500BBDAFA /* InboxView.swift */,
@@ -200,6 +200,7 @@
 			isa = PBXGroup;
 			children = (
 				5F5B0AFC2CFD316500BBDAFA /* MainTabView.swift */,
+				5F5B0B042CFD316500BBDAFA /* Features */,
 			);
 			path = MainScreen;
 			sourceTree = "<group>";
@@ -215,10 +216,8 @@
 		5F5B0B022CFD316500BBDAFA /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				5F3DB1E42D1BA15E002E8881 /* TextEditorView.swift */,
 				5F5B0B012CFD316500BBDAFA /* ProfileView.swift */,
 				5F7A6BDF2CFF8A2200A2CF1D /* ProfileEditView.swift */,
-				5FEA56962D0885C100919331 /* CircularProfileImage.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -235,7 +234,6 @@
 		5F5B0B042CFD316500BBDAFA /* Features */ = {
 			isa = PBXGroup;
 			children = (
-				5F5B0AFE2CFD316500BBDAFA /* MainScreen */,
 				5F5B0AFB2CFD316500BBDAFA /* Inbox */,
 				5F5B0B032CFD316500BBDAFA /* Profile */,
 			);
@@ -272,6 +270,7 @@
 		5F5B0B1A2CFD317700BBDAFA /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				5F940AAC2D1E3732006E375C /* TaskHandler.swift */,
 				5FEA56942D04AF5E00919331 /* ImagePicker.swift */,
 			);
 			path = Utils;
@@ -326,7 +325,8 @@
 		5F5B0B392CFD319400BBDAFA /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				5F940AAC2D1E3732006E375C /* TaskHandler.swift */,
+				5F3DB1E42D1BA15E002E8881 /* TextEditorView.swift */,
+				5FEA56962D0885C100919331 /* CircularProfileImage.swift */,
 				5F5B0B352CFD319400BBDAFA /* HeaderView.swift */,
 				5F5B0B362CFD319400BBDAFA /* InputFieldView.swift */,
 				5F5B0B372CFD319400BBDAFA /* LoadingView.swift */,
@@ -364,20 +364,20 @@
 				5F63EDA82CF2B06400DBCABD /* Preview Content */,
 				5F63EDA92CF2B06400DBCABD /* Assets.xcassets */,
 				5FB6A4492CF63C60000AB790 /* GoogleService-Info.plist */,
+				5F63EDAB2CF2B06400DBCABD /* MessageAppRemakeApp.swift */,
 				5F5B0B392CFD319400BBDAFA /* Components */,
 				5F5B0B302CFD318D00BBDAFA /* Managers */,
 				5F5B0B292CFD318200BBDAFA /* Models */,
 				5F5B0B1C2CFD317A00BBDAFA /* ViewModifiers */,
 				5F5B0B1A2CFD317700BBDAFA /* Utils */,
 				5F5B0B212CFD317F00BBDAFA /* Services */,
-				5F63EDAB2CF2B06400DBCABD /* MessageAppRemakeApp.swift */,
 				5F5B0B152CFD317300BBDAFA /* Root */,
-				5F5B0B042CFD316500BBDAFA /* Features */,
+				5F5B0AFE2CFD316500BBDAFA /* MainScreen */,
 			);
 			path = MessageAppRemake;
 			sourceTree = "<group>";
 		};
-		5FE812F42D19E81200470823 /* Groupshit */ = {
+		5FE812F42D19E81200470823 /* GroupDetails */ = {
 			isa = PBXGroup;
 			children = (
 				5F3DB1E62D1BA1BC002E8881 /* EditGroup.swift */,
@@ -386,7 +386,7 @@
 				5FE812FA2D19E9BD00470823 /* GroupHeader.swift */,
 				5FE812F32D19E81200470823 /* GroupChatDetails.swift */,
 			);
-			path = Groupshit;
+			path = GroupDetails;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
