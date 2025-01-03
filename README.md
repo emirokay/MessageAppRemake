@@ -6,48 +6,48 @@ A SwiftUI-based iOS application designed to replicate the core features of Whats
 https://github.com/user-attachments/assets/480c84af-7cb6-4099-aeea-872ef586ffd1
 
 ## Features
-- **Authentication
+- **Authentication**
   - Email & Password Login/Registration: Firebase Authentication to securely handle user login and registration.
   - Session Persistence: Automatically restores the user's session upon reopening the app.
 
-- **Chats
+- **Chats**
   - Inbox View: Displays all active chats for the logged-in user.
   - Individual and Group Chats: Supports private one-on-one chats and group chats.
   - Real-Time Messaging: Messages are synced instantly using Firestore's real-time updates.
   - Last Message Display: Shows the latest message and its timestamp in the Inbox view.
   - Unread Messages Counter: Displays unread message counts in the Inbox view.
 
-- **Messaging
+- **Messaging**
   - Text Messages: Send and receive text messages with accurate timestamps.
   - Read Receipts: Indicates whether messages are read or not.
   - Media Sharing: (Planned) Upload and share images in chats using Firebase Storage.
 
-- **Profiles
+- **Profiles**
   - User Profile: View and edit user details, including profile picture, name, and bio.
   - Custom Profile Pictures: Users can upload profile pictures to Firebase Storage.
 
-- **Search
+- **Search**
   - User Search: Search for users to start a new chat.
   - Chat Search: Quickly filter chats in the Inbox view.
 
-- **UI Design
+- **UI Design**
   - Clean, Minimalistic Design: Inspired by WhatsApp’s sleek interface, built entirely in SwiftUI.
   - Responsive Animations: Subtle animations to enhance the user experience.
   - Dynamic Chat Names: Adjusts individual chat names dynamically based on participants.
 
 ## Technologies Used
-- **Frontend
+- **Frontend**
   - Language: Swift
   - Framework: SwiftUI
   - Architecture: MVVM (Model-View-ViewModel)
   - State Management: Combine
 
-- **Backend
+- **Backend**
   - Firebase Authentication: Secure user login and registration.
   - Firestore: Real-time database for storing chats, messages, and user data.
   - Firebase Storage: Manages profile images and other media uploads.
 
-- **Other Tools
+- **Other Tools**
   - Environment Objects: Shared data across views for seamless state management.
   - Dependency Injection: Modular design using protocol-oriented programming for testability and flexibility.
   - Error and Loading State Management: Centralized system to handle loading indicators and error alerts.
