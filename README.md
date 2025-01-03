@@ -69,7 +69,7 @@ Allows users to send text messages and (future) upload images.
 4. **Profile & Settings**
 Allows users to update their profile.
 
-## Contributing
+## Contributing
 Contributions are welcome! Please fork the repository and submit a pull request with your proposed changes.
 
 ## License
